@@ -1,5 +1,3 @@
-using Pkg
-Pkg.activate(".")
 using RadMod2D
 
 # model
@@ -33,8 +31,8 @@ temp = zeros(m.no_elements,1)
 set_bc_part!(m, temp, 1:2, 300)
 temp[79:106,1] .= 600 # bc for specific elements
 @time Q, G = tempsolver(m, vfmat, temp, epsilon)
-area = [m.elem[i].area for i = m.elem2par[1].first:m.elem2par[end].last]
-q = Q[:] ./ area[:]
+length = [m.elements[i].length for i = m.elem2par[1].first:m.elem2par[end].last]
+q = Q[:] ./ length[:]
 
 println("calculation finished")
 

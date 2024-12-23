@@ -19,7 +19,7 @@ the direction of the edge (dir).
 - Part defining the edge
 """
 function edge(p1::Point2D{T2}, p2::Point2D{T2}; seed::T1 = 10, dir::Symbol=:pos, 
-        name::String="Edge") where {T1<:Integer, T2<:AbstractFloat}
+        name::String="Edge")::Part{T1,T2} where {T1<:Integer, T2<:AbstractFloat}
 
     dx = (p2.x - p1.x) / seed
     dy = (p2.y - p1.y) / seed
@@ -66,7 +66,7 @@ Creating rectangle with center. The rectangle is defined by the length in x and 
 - Part defining the rectangle
 """
 function rectangle(x::T1, y::T1, c::Point2D; seedx::T2 = 10, seedy::T2 = 10, 
-        dir::Symbol = :pos, name = "Rectangle") where {T1<:Real, T2<:Integer}
+        dir::Symbol = :pos, name::String = "Rectangle")::Part where {T1<:Real, T2<:Integer}
 
     # creating rectangle with center
     p1 = c + Point2D(-0.5*x, -0.5*y)
@@ -133,7 +133,7 @@ Creating circle based on diameter `d` and center `c`.
 - Part defining the circle
 """
 function circle(d::T1, c::Point2D; seed::T2 = 12, dir::Symbol = :pos,
-         name::String = "Circle") where {T1<:Real, T2<:Integer}
+         name::String = "Circle")::Part where {T1<:Real, T2<:Integer}
     # creating circle based on diameter and center
     r = d/2
     phi = 2 * pi / seed

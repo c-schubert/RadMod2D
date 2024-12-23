@@ -1,5 +1,5 @@
 # TODO: Plotting can be very individual, but basic plotting should be included withing
-# the package.
+# the package or rather additional package in future
 # TODO: Cleanup and docu
 
 

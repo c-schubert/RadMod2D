@@ -1,6 +1,3 @@
-using Pkg
-Pkg.activate(".")
-
 using RadMod2D
 
 include("./models2D.jl")

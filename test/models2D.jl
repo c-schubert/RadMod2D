@@ -1,6 +1,9 @@
 #= ######################################################
 Exemplary models
 ###################################################### =# 
+using FastPow
+
+const MyInt::DataType = Int64
 
 function model_two_intesecting_circles(d, seed, leftout)
     # two intersecting circles
@@ -19,8 +22,8 @@ end
 function model_rectangle(a, b, elemsize)
     # single rectangle
     m = create_empty_model()
-    seeda = round(Integer,a/elemsize)
-    seedb = round(Integer,b/elemsize)
+    seeda = round(MyInt,a/elemsize)
+    seedb = round(MyInt,b/elemsize)
     center = Point2D(0.0,0.0)
     add!(m, edge(center, center+Point2D(a,0.0), seed = seeda, dir = :pos))
     add!(m, edge(center+Point2D(a,0.0), center+Point2D(a,b), seed = seedb, dir = :pos))
@@ -35,8 +38,8 @@ end
 function model_circle_in_circle_centered(d_in, d_out, elemsize)
     # circle in circle
     m = create_empty_model()
-    seed_in = round(Integer,(pi*d_in)/elemsize)
-    seed_out = round(Integer,(pi*d_out)/elemsize)
+    seed_in = round(MyInt,(pi*d_in)/elemsize)
+    seed_out = round(MyInt,(pi*d_out)/elemsize)
     center = Point2D(0.0,0.0)
     add!(m, circle(d_in, center, seed = seed_in, dir = :neg))
     add!(m, circle(d_out, center, seed = seed_out, dir = :pos))
@@ -66,9 +69,9 @@ function model_isosceles_triangle(a, alpha_deg, elemsize)
     m = create_empty_model()
     alpha_rad = alpha_deg*pi/180
     point = Point2D(sin(alpha_rad) * a, cos(alpha_rad) * a)
-    l = sqrt((point.x-0)^2 + (point.y-a)^2)
-    seeda = round(Integer,a/elemsize)
-    seedl = round(Integer,l/elemsize)
+    @fastpow l = sqrt((point.x-0)^2 + (point.y-a)^2)
+    seeda = round(MyInt,a/elemsize)
+    seedl = round(MyInt,l/elemsize)
     center = Point2D(0.0,0.0)
     add!(m, edge(center, center+Point2D(0.0,a), seed = seeda, dir = :neg))
     add!(m, edge(center, point, seed = seeda, dir = :pos))
@@ -87,9 +90,9 @@ function model_two_rectangles_with_holes(elemsize)
     # left rect with hole
     a = 0.6
     b = 0.6
-    seeda = round(Integer,a/elemsize)
-    seedb = round(Integer,b/elemsize)
-    seedb2 = round(Integer,((b-l_spalt)/2)/elemsize)
+    seeda = round(MyInt,a/elemsize)
+    seedb = round(MyInt,b/elemsize)
+    seedb2 = round(MyInt,((b-l_spalt)/2)/elemsize)
     center = Point2D(0.0,0.0)
     add!(m, edge(center, center+Point2D(a,0.0), seed = seeda, dir = :pos))
     add!(m, edge(center+Point2D(a,b), center+Point2D(0.0,b), seed = seeda, dir = :pos))
@@ -100,9 +103,9 @@ function model_two_rectangles_with_holes(elemsize)
     c = 0.6
     d = 1.0
     y_offset = (b-d)/2
-    seedc = round(Integer,c/elemsize)
-    seedd = round(Integer,d/elemsize)
-    seedd2 = round(Integer,((d-l_spalt)/2)/elemsize)
+    seedc = round(MyInt,c/elemsize)
+    seedd = round(MyInt,d/elemsize)
+    seedd2 = round(MyInt,((d-l_spalt)/2)/elemsize)
     center = Point2D(a+x_offset,y_offset)
     add!(m, edge(center, center+Point2D(c,0.0), seed = seedc, dir = :pos))
     add!(m, edge(center+Point2D(c,d), center+Point2D(0.0,d), seed = seedc, dir = :pos))
@@ -135,7 +138,7 @@ function model_cosinus(a, b, seed)
     add!(m, cosinus(a, b, Point2D(0.0,0.0), seed = seed, dir = :pos))
     elemsize = m.elem[1].area
     l_edge = get_length(m.nodes[1], m.nodes[end])
-    seed2 = round(Integer,(l_edge/elemsize))
+    seed2 = round(MyInt,(l_edge/elemsize))
     add!(m, edge(m.nodes[1], m.nodes[end], seed = seed2, dir = :neg))
     offset_model!(m)
     mi = ConstModel(m)
@@ -151,10 +154,10 @@ function model_trapez(a, b, h, elemsize)
     p4 = Point2D(b, h)
     l = get_length(p3, p1)
     m = create_empty_model()
-    add!(m, edge(p3, p1, seed = round(Integer,l/elemsize), dir = :pos))
-    add!(m, edge(p1, p2, seed = round(Integer,a/elemsize), dir = :pos))
-    add!(m, edge(p2, p4, seed = round(Integer,l/elemsize), dir = :pos))
-    add!(m, edge(p4, p3, seed = round(Integer,b/elemsize), dir = :pos))
+    add!(m, edge(p3, p1, seed = round(MyInt,l/elemsize), dir = :pos))
+    add!(m, edge(p1, p2, seed = round(MyInt,a/elemsize), dir = :pos))
+    add!(m, edge(p2, p4, seed = round(MyInt,l/elemsize), dir = :pos))
+    add!(m, edge(p4, p3, seed = round(MyInt,b/elemsize), dir = :pos))
     offset_model!(m)
     mi = ConstModel(m)
     println("model has ", mi.no_elements, " elements")
@@ -165,10 +168,10 @@ function model_right_triangle(a, b, elemsize)
     # create model
     center = Point2D(0.0, 0.0)
     m = create_empty_model()
-    add!(m, edge(center, center+Point2D(0.0,a), seed = round(Integer,a/elemsize), dir = :neg))
-    add!(m, edge(center, center+Point2D(b,0.0), seed = round(Integer,b/elemsize), dir = :pos))
+    add!(m, edge(center, center+Point2D(0.0,a), seed = round(MyInt,a/elemsize), dir = :neg))
+    add!(m, edge(center, center+Point2D(b,0.0), seed = round(MyInt,b/elemsize), dir = :pos))
     l = get_length(Point2D(0.0,a), Point2D(b,0.0))
-    add!(m, edge(center+Point2D(0.0,a), center+Point2D(b,0.0), seed = round(Integer,l/elemsize), dir = :neg))
+    add!(m, edge(center+Point2D(0.0,a), center+Point2D(b,0.0), seed = round(MyInt,l/elemsize), dir = :neg))
     offset_model!(m)
     mi = ConstModel(m)
     println("model has ", mi.no_elements, " elements")
@@ -186,7 +189,7 @@ function model_furnace1()
     # shr
     center_shr = Point2D(0.0,(0.5*d + 0.5*d + hg + hb))
     elemsize_shr = 0.02
-    seedshr = round(Integer,(pi*d)/elemsize_shr)
+    seedshr = round(MyInt,(pi*d)/elemsize_shr)
     x = d + 0.5*d
     add!(m, circle(d, center_shr+Point2D(x,0.0), seed = seedshr, dir = :neg))
     x = d + d + 2*d + 0.5*d
@@ -195,8 +198,8 @@ function model_furnace1()
     add!(m, circle(d, center_shr+Point2D(x,0.0), seed = seedshr, dir = :neg))
     # gut
     elemsize_g = 0.03
-    seedwg = round(Integer,wg/elemsize_g)
-    seedhg = round(Integer,hg/elemsize_g)
+    seedwg = round(MyInt,wg/elemsize_g)
+    seedhg = round(MyInt,hg/elemsize_g)
     center_g = Point2D(((d + d + 2*d + 0.5*d) - (0.5*wg)),hb)
     add!(m, edge(center_g, center_g+Point2D(wg,0.0), seed = seedwg, dir = :neg))
     add!(m, edge(center_g+Point2D(wg,0.0), center_g+Point2D(wg,hg), seed = seedhg, dir = :neg))
@@ -206,8 +209,8 @@ function model_furnace1()
     w = d + d + 2*d + d + 2*d + d + d
     h = 0.5*d + d + 0.5*d + hg + hb
     elemsize_f = 0.05
-    seedw = round(Integer,w/elemsize_f)
-    seedh = round(Integer,h/elemsize_f)
+    seedw = round(MyInt,w/elemsize_f)
+    seedh = round(MyInt,h/elemsize_f)
     center_f = Point2D(0.0,0.0)
     add!(m, edge(center_f, center_f+Point2D(w,0.0), seed = seedw, dir = :pos))
     add!(m, edge(center_f+Point2D(w,0.0), center_f+Point2D(w,h), seed = seedh, dir = :pos))
@@ -232,15 +235,15 @@ function model_furnace2(d, t, n, h)
     # shr
     center_shr = Point2D(0.0,h/2)
     elemsize_shr = 0.02
-    seedshr = round(Integer,(pi*d)/elemsize_shr)
+    seedshr = round(MyInt,(pi*d)/elemsize_shr)
     for i = 1:n
         x = 0.5*t + (i-1)*t
         add!(m, circle(d, center_shr+Point2D(x,0.0), seed = seedshr, dir = :neg))
     end
     # furnace chamber
     elemsize_f = 0.05
-    seedw = round(Integer,w/elemsize_f)
-    seedh = round(Integer,h/elemsize_f)
+    seedw = round(MyInt,w/elemsize_f)
+    seedh = round(MyInt,h/elemsize_f)
     center_f = Point2D(0.0,0.0)
     add!(m, edge(center_f+Point2D(w,0.0), center_f+Point2D(w,h), seed = seedh, dir = :pos))
     add!(m, edge(center_f+Point2D(w,h), center_f+Point2D(0.0,h), seed = seedw, dir = :pos))
@@ -313,7 +316,7 @@ function model_labyrinth(path, d, elemsize)
     # start
     point1s = Point2D(0.0,0.0)
     point2s = Point2D(0.0,d)
-    add!(m, edge(point1s, point2s, seed = round(Integer,d/elemsize), dir = :neg))
+    add!(m, edge(point1s, point2s, seed = round(MyInt,d/elemsize), dir = :neg))
     # path
     point1 = point1s
     point2 = point2s
@@ -328,7 +331,7 @@ function model_labyrinth(path, d, elemsize)
         end
         # println(point1, " -> ",point2)
         l = point2 - point1
-        seed = round(Integer,norm(l)/elemsize)
+        seed = round(MyInt,norm(l)/elemsize)
         add!(m, edge(point1, point2, seed = seed, dir = :neg))
     end
     point1f = point2
@@ -346,12 +349,12 @@ function model_labyrinth(path, d, elemsize)
         end
         # println(point1, " -> ",point2)
         l = point2 - point1
-        seed = round(Integer,norm(l)/elemsize)
+        seed = round(MyInt,norm(l)/elemsize)
         add!(m, edge(point1, point2, seed = seed, dir = :pos))
     end
     point2f = point2
     # finish
-    add!(m, edge(point1f, point2f, seed = round(Integer,d/elemsize), dir = :neg))
+    add!(m, edge(point1f, point2f, seed = round(MyInt,d/elemsize), dir = :neg))
     offset_model!(m)
     mi = ConstModel(m)
     println("model has ", mi.no_elements, " elements")
@@ -362,8 +365,8 @@ function model_square_in_square(a, b, elemsize)
     # square in square
     # all edges are individual parts
     m = create_empty_model()
-    seeda = round(Integer,a/elemsize)
-    seedb = round(Integer,b/elemsize)
+    seeda = round(MyInt,a/elemsize)
+    seedb = round(MyInt,b/elemsize)
     # inner square
     center = Point2D(-0.5*a,-0.5*a)
     add!(m, edge(center, center+Point2D(a,0.0), seed = seeda, dir = :neg))
@@ -386,11 +389,11 @@ function model_rect_in_rect(r1x, r1y, r2x, r2y, elemsize)
     # rectangle in rectangle
     m = create_empty_model()
     center = Point2D(0.0,0.0)
-    seedx = round(Integer,r1x/elemsize)
-    seedy = round(Integer,r1y/elemsize)
+    seedx = round(MyInt,r1x/elemsize)
+    seedy = round(MyInt,r1y/elemsize)
     add!(m, rectangle(r1x, r1y, center, seedx = seedx, seedy = seedy, dir = :pos))
-    seedx = round(Integer,r2x/elemsize)
-    seedy = round(Integer,r2y/elemsize)
+    seedx = round(MyInt,r2x/elemsize)
+    seedy = round(MyInt,r2y/elemsize)
     add!(m, rectangle(r2x, r2y, center, seedx = seedx, seedy = seedy, dir = :neg))
     offset_model!(m)
     mi = ConstModel(m)
@@ -404,8 +407,8 @@ function model_circles_in_circle_cross(d_in, d_out, n_diag, elemsize)
         error("n_diag is an even number which is not allowed")
     end
     m = create_empty_model()
-    seed_in = round(Integer,(pi*d_in)/elemsize)
-    seed_out = round(Integer,(pi*d_out)/elemsize)
+    seed_in = round(MyInt,(pi*d_in)/elemsize)
+    seed_out = round(MyInt,(pi*d_out)/elemsize)
     center = Point2D(0.0,0.0)
     add!(m, circle(d_in, center, seed = seed_in, dir = :neg))
     dist = (d_out/2) / ((n_diag-1)/2 + 1)
@@ -444,7 +447,7 @@ function get_rand_pos_cirlce(d_in, d_out, center, n; sector = 1.0)
         pos_t = Point2D(center.x+dist*cos(angle), center.y+dist*sin(angle))
         for j = 1:i
             pos_c = pos[j]
-            dist_check = sqrt((pos_t.x-pos_c.x)^2 + (pos_t.y-pos_c.y)^2)
+            @fastpow dist_check = sqrt((pos_t.x-pos_c.x)^2 + (pos_t.y-pos_c.y)^2)
             if dist_check < (d_in + desired_offset)
                 valid = false
                 # println("penetration detected")
@@ -463,8 +466,8 @@ end
 function model_circles_in_circle_rand(d_in, d_out, n, elemsize)
     # circles in circle - distribution: random
     m = create_empty_model()
-    seed_in = round(Integer,(pi*d_in)/elemsize)
-    seed_out = round(Integer,(pi*d_out)/elemsize)
+    seed_in = round(MyInt,(pi*d_in)/elemsize)
+    seed_out = round(MyInt,(pi*d_out)/elemsize)
     center = Point2D(0.0,0.0)
     pos = get_rand_pos_cirlce(d_in, d_out, center, n, sector = 1.0)
     for i = 1:n
@@ -480,8 +483,8 @@ end
 function model_circles_in_circle_rand_full(d_in, d_out, elemsize)
     # circles in circle - distribution: random case full
     m = create_empty_model()
-    seed_in = round(Integer,(pi*d_in)/elemsize)
-    seed_out = round(Integer,(pi*d_out)/elemsize)
+    seed_in = round(MyInt,(pi*d_in)/elemsize)
+    seed_out = round(MyInt,(pi*d_out)/elemsize)
     center = Point2D(0.0,0.0)
     pos = [ Point2D(-0.17160541430982149, 0.2336985360150676),
             Point2D(0.22451500551137007, -0.30768142248166275),
@@ -513,8 +516,8 @@ end
 function model_circles_in_circle_rand_half(d_in, d_out, elemsize)
     # circles in circle - distribution: random case half
     m = create_empty_model()
-    seed_in = round(Integer,(pi*d_in)/elemsize)
-    seed_out = round(Integer,(pi*d_out)/elemsize)
+    seed_in = round(MyInt,(pi*d_in)/elemsize)
+    seed_out = round(MyInt,(pi*d_out)/elemsize)
     center = Point2D(0.0,0.0)
     pos = [ Point2D(-0.05106910757240293, 0.5551081147435735),
             Point2D(0.6912293507261287, 0.1284491037094026),
@@ -546,8 +549,8 @@ end
 function model_circles_in_circle_rand_quarter(d_in, d_out, elemsize)
     # circles in circle - distribution: random case quarter
     m = create_empty_model()
-    seed_in = round(Integer,(pi*d_in)/elemsize)
-    seed_out = round(Integer,(pi*d_out)/elemsize)
+    seed_in = round(MyInt,(pi*d_in)/elemsize)
+    seed_out = round(MyInt,(pi*d_out)/elemsize)
     center = Point2D(0.0,0.0)
     pos = [ Point2D(0.04653955138185156, 0.6005048683982765),
             Point2D(0.5058154728811148, 0.5154802821741737),
@@ -583,7 +586,7 @@ function model_line_to_line_with_obstacles(a, b, c, n, elemsize)
     # c - distance between start and obstacle line
     # n - number of obstacle lines
     m = create_empty_model()
-    seeda = round(Integer,a/elemsize)
+    seeda = round(MyInt,a/elemsize)
     point1 = Point2D(0.0,0.0)
     point2 = Point2D(a,0.0)
     add!(m, edge(point1, point2, seed = seeda, dir = :pos))
@@ -591,7 +594,7 @@ function model_line_to_line_with_obstacles(a, b, c, n, elemsize)
     point2 = Point2D(a,b)
     add!(m, edge(point1, point2, seed = seeda, dir = :neg))
     d = a / (2*n-1)
-    seedd = round(Integer,d/elemsize)
+    seedd = round(MyInt,d/elemsize)
     e = 0.0
     for i = 1:n
         point1 = Point2D(e,c)
@@ -603,5 +606,46 @@ function model_line_to_line_with_obstacles(a, b, c, n, elemsize)
     offset_model!(m)
     mi = ConstModel(m)
     println("model has ", mi.no_elements, " elements")
+    return mi
+end
+
+function model_reku(d, l, w, nrl, nrq, lt, qt, elemsize1, elemsize2)
+    # circles in rectangle
+    # d rohr
+    # l kanallaenge
+    # w kanalbreite
+    # nrl rohranzahl laengs in l-dir
+    # nrq rohranzahl quer in w-dir
+    # lt laengsteilung
+    # qt querteilung
+    # rectangle
+    m = create_empty_model()
+    seedx = round(Integer,l/elemsize1)
+    seedy = round(Integer,w/elemsize1)
+    add!(m, edge(Point2D(0.0,0.0), Point2D(0.0,w), seed = seedy, dir = "neg"))
+    add!(m, edge(Point2D(0.0,w), Point2D(l,w), seed = seedx, dir = "neg"))
+    add!(m, edge(Point2D(l,w), Point2D(l,0.0), seed = seedy, dir = "neg"))
+    add!(m, edge(Point2D(l,0.0), Point2D(0.0,0.0), seed = seedx, dir = "neg"))
+    # circles
+    seedcir = round(Integer,(pi*d)/elemsize2)
+    pos = Matrix{Point2D}(undef,nrq,nrl)
+    x0 = 0.6 * l
+    y0 = (w - ((nrq-1)*qt)) / 2
+    x = x0
+    y = y0
+    for j = 1:nrl
+        for i = 1:nrq
+            pos[i,j] = Point2D(x, y)
+            y += qt
+        end
+        x += lt
+        y = y0
+    end
+    for i = 1:nrq, j = 1:nrl
+        add!(m, circle(d, pos[i,j], seed = seedcir, dir = "neg"))
+    end
+    offset_model!(m)
+    mi = make_model_immutable(m)
+    println("model has ", mi.nelem, " elements")
     return mi
 end

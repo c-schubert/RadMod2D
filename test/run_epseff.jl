@@ -1,7 +1,3 @@
-using Pkg
-Pkg.activate(".")
-Pkg.instantiate()
-
 using RadMod2D
 
 include("./cases_epseff.jl")

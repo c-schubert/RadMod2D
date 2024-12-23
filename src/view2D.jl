@@ -83,6 +83,8 @@ function is_overlapping2D(box1::SVector{4,T}, box2::SVector{4,T})::Bool where T 
     box2x = @view box2[1:2]
     box2y = @view box2[3:4]
     inside = false
+
+
     if is_overlapping1D(box1x, box2x) && is_overlapping1D(box1y, box2y)
         inside = true
     end
@@ -104,15 +106,19 @@ and box2 = [xmin, xmax].
 #Returns
 - `inside::Bool`: true if 1D "areas" are overlapping, false otherwise
 """
-function is_overlapping1D(a1,a2)::Bool
-    xmin1 = a1[1]
-    xmax1 = a1[2]
-    xmin2 = a2[1]
-    xmax2 = a2[2]
-    inside = false
+function is_overlapping1D(box1::SubArray,box2::SubArray)::Bool
+
+    xmin1 = box1[1]
+    xmax1 = box1[2]
+    xmin2 = box2[1]
+    xmax2 = box2[2]
+
+    inside::Bool = false
+
     if xmax1 >= xmin2 && xmax2 >= xmin1
         inside = true
     end
+
     return inside
 end
 
@@ -156,13 +162,12 @@ the normal vector of the elements e1 and e2 and the connector is smaller than 90
 - `e1::ConstLineElement`: first element
 - `e2::ConstLineElement`: second element
 """
-function are_elements_facing(e1::ConstLineElement, e2::ConstLineElement)::Bool
+function are_elements_facing(e1::ConstLineElement{T1,T2}, e2::ConstLineElement{T1,T2})::Bool where {T1<:Integer, T2<:AbstractFloat} 
     con = e2.com - e1.com
     phir1 = get_angle(e1.norm_vec,con)
-    phir2 = get_angle(e2.norm_vec,con*(-1))
-    tol = 1E-8
+    phir2 = get_angle(e2.norm_vec,con*(-1.0))
 
-    if phir1 < (pi/2 - tol) && phir2 < (pi/2 - tol)
+    if phir1 < (pi * 0.5 - _TOL) && phir2 < (pi * 0.5 - _TOL)
         return true
     end  
     
@@ -179,8 +184,8 @@ each other if nothing is blocking them and sets the corresponding entry in the p
 blocking matrix to 1 (no blocking), if so. Should be used as initializer for the other
 blocking methods.
 """
-function existing_vf!(m::ConstModel, 
-            vfmat::Matrix{T})::Nothing where T <: AbstractFloat
+function existing_vf!(m::ConstModel{T1, T2}, 
+            vfmat::Matrix{T2})::Nothing where {T1<:Integer, T2<:AbstractFloat}
 
     for i1 = 1:m.no_elements, i2 = (i1+1):m.no_elements
         if are_elements_facing(m.elements[i1], m.elements[i2])
@@ -188,6 +193,8 @@ function existing_vf!(m::ConstModel,
             vfmat[i2,i1] = 1.0
         end
     end
+
+    return nothing
 end
 
 
@@ -199,8 +206,8 @@ Checks if element pairs are blocked by others with brute force method. Sets the
 corresponding entry in the passed blocking matrix to 0 (blocking), if so. This method is
 very slow (O ~ n^3) and should only be used for small models. 
 """
-function blocking_vf_brute_force!(m::ConstModel, 
-    vfmat::Matrix{T})::Nothing where T <: AbstractFloat
+function blocking_vf_brute_force!(m::ConstModel{T1, T2}, 
+    vfmat::Matrix{T2})::Nothing where {T1<:Integer, T2<:AbstractFloat}
 
     for i1 = 1:m.no_elements, i2 = (i1+1):m.no_elements
         if isapprox(vfmat[i1,i2], 1.0)
@@ -231,12 +238,12 @@ Gets a tiling of the model with n x n tiles. Returns the dimensions of a single
 tile delta_x and delta_y.
 
 """
-function get_tile_dimensions(m::ConstModel, n::Integer)::Tuple
+function get_tile_dimensions(m::ConstModel{T1, T2}, n::Integer)::Tuple{T2,T2} where {T1<:Integer, T2<:AbstractFloat}
     # create tiles based on model nodes
     # get min and max x and y of nodes
     nmin, nmax = get_min_max_coordinates(m)
-    delta_x = (nmax.x - nmin.x) / n
-    delta_y = (nmax.y - nmin.y) / n
+    delta_x::T2 = (nmax.x - nmin.x) / n
+    delta_y::T2 = (nmax.y - nmin.y) / n
     return delta_x, delta_y
 end
 
@@ -287,14 +294,14 @@ end
 
 
 
-function blocking_vf_with_tiles!(m::ConstModel, mat, dx::T1, dy::T1, n::T2, 
+function blocking_vf_with_tiles!(m::ConstModel{T2, T1}, mat::Matrix{T1}, dx::T1, dy::T1, n::T2, 
             t_occ::Matrix{Union{Vector{T2},Missing}})::Nothing where {T1<:AbstractFloat, T2<:Integer}
 
     # check if element pairs are blocked by others with tiles
     max_steps = get_max_steps(n)
     tiles = Vector{Index2D{T2}}(undef,max_steps)
     @inbounds for i1 = 1:m.no_elements, i2 = (i1+1):m.no_elements
-        # println("--------> checking ",i1," and ",i2)
+        # println("--------> checking ",i1," and ",i2) 
         p1 = m.elements[i1].com
         p2 = m.elements[i2].com
         if isapprox(mat[i1,i2], 1.0)
@@ -328,16 +335,20 @@ function blocking_vf_with_tiles!(m::ConstModel, mat, dx::T1, dy::T1, n::T2,
             end
         end
     end
+
+    return nothing
 end
 
 
 
-function blocking_vf_with_tiles_simplified!(m::ConstModel, vfmat::Matrix{T1}, dx::T1, dy::T1, n::T2, t_occ::Matrix{Union{Vector{T2},Missing}}; elem_in_t = 12::T2, skipped_t::T2 = 2) where {T1<:AbstractFloat, T2<:Integer}
+function blocking_vf_with_tiles_simplified!(m::ConstModel{T2, T1}, vfmat::Matrix{T1}, dx::T1, 
+            dy::T1, n::T2, t_occ::Matrix{Union{Vector{T2},Missing}}; elem_in_t = 12::T2, 
+            skipped_t::T2 = 2)::Nothing where {T1<:AbstractFloat, T2<:Integer}
     # check if element pairs are blocked by others with tiles
     max_steps = get_max_steps(n)
     tiles = Vector{Index2D{T2}}(undef,max_steps)
-    count_simp = 0
-    count_all = 0
+    count_simp::T2 = 0
+    count_all::T2 = 0
     @inbounds for i1 = 1:m.no_elements, i2 = (i1+1):m.no_elements
         # println("--------> checking ",i1," and ",i2)
         p1 = m.elements[i1].com
@@ -352,7 +363,9 @@ function blocking_vf_with_tiles_simplified!(m::ConstModel, vfmat::Matrix{T1}, dx
                 if !ismissing(t_occ[t.x,t.y])
                     # println("------> occupied ")
                     count_all += 1
-                    if size(t_occ[t.x,t.y],1) <= elem_in_t || i <= 1+skipped_t || i >= ntiles-skipped_t
+                    if (size(t_occ[t.x,t.y],1) <= elem_in_t || i <= 1+skipped_t || 
+                                i >= ntiles-skipped_t)
+
                         for it in t_occ[t.x,t.y]
                             if it != i1 && it != i2
                                 # println("------> ",i1," and ",i2, " checking with ",it)
@@ -383,6 +396,8 @@ function blocking_vf_with_tiles_simplified!(m::ConstModel, vfmat::Matrix{T1}, dx
     end
     # println("counter simp/all: ", count_simp, " / ", count_all)
     println("simplification rate: ", round(count_simp/count_all*100, digits = 2), " %")
+
+    return nothing
 end
 
 
@@ -403,7 +418,8 @@ in the model `m` and stores them in the matrix `mat`.
 # Returns
 - `nothing`: the viewfactors are updated within the matrix `mat`
 """
-function calculating_vf!(m::ConstModel, mat::Matrix{T}; normit = false)::Nothing where T <: AbstractFloat
+function calculating_vf!(m::ConstModel{T2, T1}, mat::Matrix{T1}; normit::Bool = false
+            )::Nothing  where {T1<:AbstractFloat, T2<:Integer}
     # calculate viewfactors if vf is existing
     for i1 = 1:m.no_elements, i2 = (i1+1):m.no_elements
         if isapprox(mat[i1,i2],1.0)
@@ -433,6 +449,8 @@ function calculating_vf!(m::ConstModel, mat::Matrix{T}; normit = false)::Nothing
         control = sum(mat, dims=2)
         mat .= mat ./ control
     end
+
+    return nothing
 end
 
 

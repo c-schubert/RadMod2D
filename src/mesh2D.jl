@@ -11,11 +11,11 @@ made immutable for efficiency within the vief factor and blocking calculations.
 Therefore, two different structs are used.
 ###################################################### =# 
 
-abstract type AbstractLineElement end
-abstract type AbstractModel end
+abstract type AbstractLineElement{T1<:Integer, T2<:AbstractFloat} end
+abstract type AbstractModel{T1<:Integer, T2<:AbstractFloat} end
 
 
-mutable struct MutableLineElement{T1<:Integer, T2<:AbstractFloat} <: AbstractLineElement
+mutable struct MutableLineElement{T1<:Integer, T2<:AbstractFloat} <: AbstractLineElement{T1,T2}
     no_node1::T1
     no_node2::T1
     com::Point2D{T2}
@@ -28,7 +28,7 @@ mutable struct MutableLineElement{T1<:Integer, T2<:AbstractFloat} <: AbstractLin
 end
 
 
-struct ConstLineElement{T1<:Integer, T2<:AbstractFloat} <: AbstractLineElement
+struct ConstLineElement{T1<:Integer, T2<:AbstractFloat} <: AbstractLineElement{T1,T2}
     no_node1::T1
     no_node2::T1
     com::Point2D{T2}
@@ -63,8 +63,10 @@ struct ElementToPartAssign{T<:Integer}
     # end
 end
 
+# TODO if type sould be used outside package it makes sense to rename to something more
+# concrete for example Mutable2DRadSurfGeom (same for const model)
 
-mutable struct MutableModel{T1<:Integer, T2<:AbstractFloat} <: AbstractModel
+mutable struct MutableModel{T1<:Integer, T2<:AbstractFloat} <: AbstractModel{T1,T2}
     nodes::Vector{Point2D{T2}}
     elements::Vector{MutableLineElement{T1,T2}}
     elem2par::Vector{ElementToPartAssign{T1}}
@@ -80,7 +82,7 @@ mutable struct MutableModel{T1<:Integer, T2<:AbstractFloat} <: AbstractModel
 end
 
 
-struct ConstModel{T1<:Integer, T2<:AbstractFloat} <: AbstractModel
+struct ConstModel{T1<:Integer, T2<:AbstractFloat} <: AbstractModel{T1,T2}
     nodes::Vector{Point2D{T2}}
     elements::Vector{ConstLineElement{T1,T2}}
     elem2par::Vector{ElementToPartAssign{T1}}

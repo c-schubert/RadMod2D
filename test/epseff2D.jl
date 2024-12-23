@@ -32,7 +32,7 @@ function get_epsilon_effective(m, mat, p_hole; epsilon_ink = 0.1)
         G_hole = sum(Ga[m.elem2par[p_hole].first:m.elem2par[p_hole].last])
         Qp_hole = sum(Qp[m.elem2par[p_hole].first:m.elem2par[p_hole].last])
         # calculation of epsilon effective
-        epsilon_eff = 1.0 - (G_hole / (area_hole * sigma * (temp_hole^4 - temp_encl^4)))
+        @fastpow epsilon_eff = 1.0 - (G_hole / (area_hole * sigma * (temp_hole^4 - temp_encl^4)))
         epsilon_encl[i,2] = epsilon_eff
     end
     return epsilon_encl

@@ -2,7 +2,7 @@ const _SIGMA = 5.670374419E-8
 
 
 
-function create_identity_matrix(n::T) where T<:Integer
+function create_identity_matrix(n::T)::Matrix{T} where T<:Integer
     id_mat = zeros(T,n,n)
     for i = 1:n
         id_mat[i,i] = 1
@@ -12,7 +12,7 @@ end
 
 
 
-function tempsolver(m, vfmat, temp, epsilon)
+function tempsolver(m::ConstModel{T1, T2}, vfmat::Matrix{T2}, temp::Matrix{T2}, epsilon::Matrix{T2}) where  {T1 <: Integer, T2 <: AbstractFloat}
     # old algorithm used in matlab (slightly optimized)
     # prepare matrix for LGS
     # J --> outgoing radiation of element
@@ -22,7 +22,7 @@ function tempsolver(m, vfmat, temp, epsilon)
     id_mat = create_identity_matrix(m.no_elements)
     mat .= mat .+ id_mat
     # solve LGS
-    B = (temp[:,1].^4) .* _SIGMA .* epsilon
+    @fastpow B = (temp[:,1].^4) .* _SIGMA .* epsilon
     J = mat \ B
     # Bestimmung der einfallenden Strahlung G
     G = zeros(Float64,m.no_elements,1)

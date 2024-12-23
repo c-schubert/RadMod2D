@@ -1,8 +1,4 @@
-using Pkg
-Pkg.activate(".")
-Pkg.instantiate()
-
-using RadMod2D
+using RadMod2D,Test
 
 include("./models2D.jl")
 
@@ -41,6 +37,9 @@ println("RadMod2D results:")
 for i = 1:size(vfmatp,1)
     println(vfmatp[i,:])
 end
+
+@test isapprox(vfmata,vfmatp,atol=1E-4)
+
 diff = vfmata - vfmatp
 # println("difference:")
 # for i = 1:size(diff,1)

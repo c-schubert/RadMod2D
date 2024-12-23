@@ -4,9 +4,16 @@ module RadMod2D
     using DelimitedFiles
     using StaticArrays
     using LinearAlgebra
+    using FastPow
+    # TODO: For now plotting included within package -> Later move to additional package
     using GLMakie
+
+    # TODO: image export functionality within plotting functions
     # using CairoMakie # for image export
     # CairoMakie.activate!(type = "svg")
+
+
+    const _TOL = 1E-12
     
     include("./struct2D.jl")
     export Point2D, Index2D

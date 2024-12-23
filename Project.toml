@@ -1,13 +1,11 @@
 name = "RadMod2D"
 uuid = "723a71d8-0f86-474d-986f-9ec2468b6e18"
-authors = ["Dominik Büschgens", "Christian Schubert", " and contributors"]
-version = "0.2.0"
+authors = ["Dominik Büschgens <bueschgens@iob.rwth-aachen.de>", "Christian Schubert", " and contributors"]
+version = "0.1.1"
 
 [deps]
-AbstractPlotting = "537997a7-5e4e-5d89-9595-2241ea00577e"
-CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
-FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+FastPow = "c0e83750-1142-43a8-81cf-6c956b72b4d1"
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
