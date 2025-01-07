@@ -260,9 +260,9 @@ function element_analysis(m::AbstractModel; printit = true)::Tuple{Float64,Float
     e_length_max = maximum(length)
     if printit
         println("Element length:")
-        println("    Mean: ", e_length_mean)
-        println("    Min: ", e_length_min)
-        println("    Max: ", e_length_max)
+        println("\tMean: ", e_length_mean)
+        println("\tMin: ", e_length_min)
+        println("\tMax: ", e_length_max)
     end
     
     return e_length_max, e_length_min, e_length_mean

@@ -2,6 +2,10 @@ using RadMod2D
 
 include("./models2D.jl")
 
+using CairoMakie
+CairoMakie.activate!(type = "png")
+filetype = ".png"
+
 # parameter
 r1x = 0.8
 r1y = 0.8
@@ -19,7 +23,8 @@ ax1 = fig1[1,1] = Axis(fig1)
 ax1.xlabel = "X in m"
 ax1.ylabel = "Y in m"
 ax1.aspect = DataAspect()
-plot_model(fig1, ax1, m, shownvec = true, shownodes = false, showcom = false, showleg = true, legpos = "right", linewidth = 1.5)
+plot_model(fig1, ax1, m, shownvec = true, shownodes = false, showcom = false, 
+        showleg = true, legpos = "right", linewidth = 1.5)
 
 # view factors
 vfmat = zeros(Float64, m.no_elements, m.no_elements)
@@ -46,7 +51,8 @@ ax2 = fig2[1,1] = Axis(fig2)
 ax2.xlabel = "X in m"
 ax2.ylabel = "Y in m"
 ax2.aspect = DataAspect()
-cbar = plot_model_with_value(fig2, ax2, m, q, "Heat flux density in W/m", cmap = :jet, showcbar = true, cbarpos = "right", linewidth = 1.5)
+cbar = plot_model_with_value(fig2, ax2, m, q, "Heat flux density in W/m", cmap = :jet, 
+        showcbar = true, cbarpos = "right", linewidth = 1.5)
 cbar.height = Relative(2/3)
 
 # display(fig1)

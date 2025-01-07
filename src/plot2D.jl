@@ -32,7 +32,7 @@ end
 
 
 function plot_model(fig, ax, m::AbstractModel; show_norm_vec=false, shownodes=false, 
-        showcom=false, showleg=true, colors=to_colormap(:rainbow, m.no_parts), 
+        showcom=false, showleg=true, colors=resample_cmap(:rainbow, m.no_parts), 
         linewidth=3.0, legpos="bottom")
 
     elem_lines = Vector(undef, m.no_parts)

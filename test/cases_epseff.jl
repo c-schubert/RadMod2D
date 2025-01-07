@@ -317,3 +317,4 @@ function plot_epseff_cosinus()
     arr = set_arrangement(size(case,1), col = 2)
     plot_cases(case, m, arr, "fig_plot_cosinus", refcase = 1)
 end
+
