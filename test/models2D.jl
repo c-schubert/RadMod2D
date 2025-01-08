@@ -3,6 +3,9 @@ Exemplary models
 ###################################################### =# 
 using FastPow
 
+include("./plot2D.jl")
+include("./plot2D_debug.jl")
+
 const MyInt::DataType = Int64
 
 function model_two_intesecting_circles(d, seed, leftout)
@@ -136,7 +139,7 @@ function model_cosinus(a, b, seed)
     # cosinus
     m = create_empty_model()
     add!(m, cosinus(a, b, Point2D(0.0,0.0), seed = seed, dir = :pos))
-    elemsize = m.elem[1].area
+    elemsize = m.elements[1].length
     l_edge = get_length(m.nodes[1], m.nodes[end])
     seed2 = round(MyInt,(l_edge/elemsize))
     add!(m, edge(m.nodes[1], m.nodes[end], seed = seed2, dir = :neg))
@@ -622,10 +625,10 @@ function model_reku(d, l, w, nrl, nrq, lt, qt, elemsize1, elemsize2)
     m = create_empty_model()
     seedx = round(Integer,l/elemsize1)
     seedy = round(Integer,w/elemsize1)
-    add!(m, edge(Point2D(0.0,0.0), Point2D(0.0,w), seed = seedy, dir = "neg"))
-    add!(m, edge(Point2D(0.0,w), Point2D(l,w), seed = seedx, dir = "neg"))
-    add!(m, edge(Point2D(l,w), Point2D(l,0.0), seed = seedy, dir = "neg"))
-    add!(m, edge(Point2D(l,0.0), Point2D(0.0,0.0), seed = seedx, dir = "neg"))
+    add!(m, edge(Point2D(0.0,0.0), Point2D(0.0,w), seed = seedy, dir = :neg))
+    add!(m, edge(Point2D(0.0,w), Point2D(l,w), seed = seedx, dir = :neg))
+    add!(m, edge(Point2D(l,w), Point2D(l,0.0), seed = seedy, dir = :neg))
+    add!(m, edge(Point2D(l,0.0), Point2D(0.0,0.0), seed = seedx, dir = :neg))
     # circles
     seedcir = round(Integer,(pi*d)/elemsize2)
     pos = Matrix{Point2D}(undef,nrq,nrl)
@@ -642,10 +645,10 @@ function model_reku(d, l, w, nrl, nrq, lt, qt, elemsize1, elemsize2)
         y = y0
     end
     for i = 1:nrq, j = 1:nrl
-        add!(m, circle(d, pos[i,j], seed = seedcir, dir = "neg"))
+        add!(m, circle(d, pos[i,j], seed = seedcir, dir = :neg))
     end
     offset_model!(m)
-    mi = make_model_immutable(m)
-    println("model has ", mi.nelem, " elements")
+    mi = ConstModel(m)
+    println("model has ", mi.no_elements, " elements")
     return mi
 end

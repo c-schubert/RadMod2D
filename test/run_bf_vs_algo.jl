@@ -46,7 +46,7 @@ function fig_n_study_mesh2D_allinone()
     m[2,1] = model_circles_in_circle_rand_quarter(0.1, 1.8, 0.005)
     m[2,2] = model_circles_in_circle_cross(0.1, 1.8, 9, 0.005)
     # 2D plot
-    fig = Figure(resolution = (300, 300), font = "Arial", fontsize = 10)
+    fig = Figure(size = (300, 300), font = "Arial", fontsize = 10)
     for i = 1:2
         for j = 1:2
             ax = fig[i, j] = Axis(fig)
@@ -57,7 +57,7 @@ function fig_n_study_mesh2D_allinone()
             ax.aspect = DataAspect()
             colors = Vector{Any}(undef,18)
             colors[:] .= :black
-            plot_model(fig, ax, m[i,j], shownvec = false, shownodes = false, showcom = false, showleg = false, colors = colors, linewidth = linewidth)
+            plot_model(fig, ax, m[i,j], show_norm_vec = false, show_nodes = false, show_com = false, show_leg = false, colors = colors, linewidth = linewidth)
         end
     end
     # display(fig)

@@ -29,7 +29,7 @@ function fig_pinhole_therm2D_eps(eps_lab)
     # rect2_min = minimum(Qp[m.elem2par[6].first:m.elem2par[10].last,1])
     # rect2_max = maximum(Qp[m.elem2par[6].first:m.elem2par[10].last,1])
     # println("Qp of rect2 between :", rect2_min, " and ", rect2_max)
-    area = [m.elem[i].area for i = m.elem2par[1].first:m.elem2par[end].last]
+    area = [m.elements[i].length for i = m.elem2par[1].first:m.elem2par[end].last]
     qp_area = Qp[:] ./ area[:]
     qp_area_kw = qp_area ./ 1000
     rect2_min = minimum(qp_area_kw[m.elem2par[6].first:m.elem2par[10].last,1])
@@ -41,7 +41,7 @@ function fig_pinhole_therm2D_eps(eps_lab)
     qp_area_kw_mod[qp_area_kw.<=rect2_min] .= rect2_min
     qp_area_kw_mod .*= (-1)
     # 2D plot
-    fig = Figure(resolution = (270, 400), font = "Arial", fontsize = 10)
+    fig = Figure(size = (270, 400), font = "Arial", fontsize = 10)
     ax = fig[1, 1] = Axis(fig)
     linewidth = 1.0
     setup_axis!(ax, linewidth)
@@ -68,7 +68,7 @@ function fig_pinhole_therm2D_eps(eps_lab)
     #     println(m.nodes[i].x, ";", m.nodes[i].y)
     # end
     # for i = 1:m.no_elements
-    #     println(m.elem[i].node1, ";", m.elem[i].node2, ";", m.elem[i].com, ";", m.elem[i].nvec, ";", m.elem[i].area)
+    #     println(m.elements[i].node1, ";", m.elements[i].node2, ";", m.elements[i].com, ";", m.elements[i].nvec, ";", m.elements[i].length)
     # end
     # for i = 1:m.no_elements
     #     println(temp[i,:], ";", epsilon[i,:], ";", qp_area_kw_mod[i,:])

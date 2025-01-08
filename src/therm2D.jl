@@ -11,8 +11,9 @@ function create_identity_matrix(n::T)::Matrix{T} where T<:Integer
 end
 
 
+function tempsolver(m::ConstModel{T1, T2}, vfmat::Matrix{T2}, temp::Vector{T2}, 
+    epsilon::Vector{T2}) where  {T1 <: Integer, T2 <: AbstractFloat}
 
-function tempsolver(m::ConstModel{T1, T2}, vfmat::Matrix{T2}, temp::Matrix{T2}, epsilon::Matrix{T2}) where  {T1 <: Integer, T2 <: AbstractFloat}
     # old algorithm used in matlab (slightly optimized)
     # prepare matrix for LGS
     # J --> outgoing radiation of element
@@ -22,7 +23,7 @@ function tempsolver(m::ConstModel{T1, T2}, vfmat::Matrix{T2}, temp::Matrix{T2}, 
     id_mat = create_identity_matrix(m.no_elements)
     mat .= mat .+ id_mat
     # solve LGS
-    @fastpow B = (temp[:,1].^4) .* _SIGMA .* epsilon
+    @fastpow B = (temp.^4) .* _SIGMA .* epsilon
     J = mat \ B
     # Bestimmung der einfallenden Strahlung G
     G = zeros(Float64,m.no_elements,1)
@@ -33,7 +34,16 @@ function tempsolver(m::ConstModel{T1, T2}, vfmat::Matrix{T2}, temp::Matrix{T2}, 
     area = [m.elements[i].length for i = m.elem2par[1].first:m.elem2par[end].last]
     Qp = (J[:,1] - G[:,1]) .* area[:,1]
     Ga = G[:,1] .* area[:,1]
+
     return Qp, Ga
+end
+
+
+function tempsolver(m::ConstModel{T1, T2}, vfmat::Matrix{T2}, temp::Matrix{T2}, 
+        epsilon::Matrix{T2}) where  {T1 <: Integer, T2 <: AbstractFloat}
+
+
+        return tempsolver(m, vfmat, temp[:,1], epsilon[:,1])
 end
 
 

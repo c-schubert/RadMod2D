@@ -21,7 +21,7 @@ function setup_legend(leg)
     leg.padding = (3.0f0, 3.0f0, 1.0f0, 1.0f0) # default: (10.0f0, 10.0f0, 8.0f0, 8.0f0)
 end
 
-function setup_axis!_epseff(ax)
+function setup_axis_epseff!(ax)
     linewidth = 2.0
     setup_axis!(ax, linewidth)
     ax.xlabel = "epsilon"
@@ -36,12 +36,11 @@ end
 
 function plot_epseff(case, val, filename)
     # 2D plot
-    fig = Figure(resolution = (300, 300), font = "Arial", fontsize = 12)
+    fig = Figure(size = (300, 300), font = "Arial", fontsize = 12)
     ax = fig[1, 1] = Axis(fig)
-    linewidth = setup_axis!_epseff(ax)
+    linewidth = setup_axis_epseff!(ax)
     # colors = [:red, :green, :blue, :orange, :cyan, :purple1]
-    # colors = to_colormap(:rainbow, size(case,1))
-    colors = to_colormap(:Dark2_8, size(case,1))
+    colors = resample_cmap(:rainbow, size(case,1))
     plt_lin = Vector(undef,(size(case,1)))
     for i = 1:size(case,1)
         plt_lin[i] = lines!(ax, val[:,(2*i-1)], val[:,(2*i)], linewidth = linewidth, color = colors[i])
@@ -64,7 +63,7 @@ function calc_vfmat(m; n = 30)
 end
 
 function plot_cases(case, m, arr, filename; lim = (nothing, nothing), refcase = 1)
-    fig = Figure(resolution = (700, 700), font = "Arial", fontsize = 12)
+    fig = Figure(size = (700, 700), font = "Arial", fontsize = 12)
     for i = 1:size(case,1)
         ax = fig[arr[i,1], arr[i,2]] = Axis(fig)
         linewidth = 2.0
@@ -76,8 +75,8 @@ function plot_cases(case, m, arr, filename; lim = (nothing, nothing), refcase = 
         ax.aspect = DataAspect()
         colors = Vector{Any}(undef,18)
         colors[:] .= :black
-        plot_model(fig, ax, m[refcase], showleg = false, colors = colors, linewidth = 0)
-        plot_model(fig, ax, m[i], showleg = false, colors = colors, linewidth = linewidth)
+        plot_model(fig, ax, m[refcase], show_leg = false, colors = colors, linewidth = 0)
+        plot_model(fig, ax, m[i], show_leg = false, colors = colors, linewidth = linewidth)
     end
     save(filename*filetype, fig, px_per_unit = 8)
 end
@@ -231,7 +230,7 @@ function plot_epseff_round_groove()
             0.2 62.55;
             0.5 142.79;
             0.9999 357.19] # cant calculate phi = 1.0
-    m = Vector{Model}(undef,size(case,1))
+    m = Vector{ConstModel}(undef,size(case,1))
     for i = 1:size(case,1)
         m[i] = model_circle_with_opening_line_centered(2.0, 360, round(Integer,case[i,2]))
     end
@@ -249,7 +248,7 @@ function plot_epseff_v_groove()
             0.592 72.6;
             0.707 90;
             0.9999 178.4] # cant calculate phi = 1.0
-    m = Vector{Model}(undef,size(case,1))
+    m = Vector{ConstModel}(undef,size(case,1))
     for i = 1:size(case,1)
         m[i] = model_isosceles_triangle(3.0, case[i,2], 0.01)
     end
@@ -266,7 +265,7 @@ function plot_epseff_square_groove()
         case[i,1] = i
         case[i,2] = i * h
     end
-    m = Vector{Model}(undef,size(case,1))
+    m = Vector{ConstModel}(undef,size(case,1))
     for i = 1:size(case,1)
         m[i] = model_rectangle(h, case[i,2], 0.05)
     end
@@ -279,7 +278,7 @@ function plot_epseff_elbow_piece()
     # plot all cases in one figure
     case = [0.707 1.0 1.0;
             0.850 1.0 0.2]
-    m = Vector{Model}(undef,size(case,1))
+    m = Vector{ConstModel}(undef,size(case,1))
     for i = 1:size(case,1)
         m[i] = model_right_triangle(case[i,2], case[i,3], 0.01)
     end
@@ -293,7 +292,7 @@ function plot_epseff_trapez()
     a = 2.0
     b = 3.0
     case = collect(1:10)
-    m = Vector{Model}(undef,size(case,1))
+    m = Vector{ConstModel}(undef,size(case,1))
     for i = 1:size(case,1)
         m[i] = model_trapez(a, b, case[i,1], 0.05)
     end
@@ -310,7 +309,7 @@ function plot_epseff_cosinus()
             2.0 1.0;
             2.5 1.0;
             3.0 1.0]
-    m = Vector{Model}(undef,size(case,1))
+    m = Vector{ConstModel}(undef,size(case,1))
     for i = 1:size(case,1)
         m[i] = model_cosinus(case[i,1], case[i,2], 100)
     end

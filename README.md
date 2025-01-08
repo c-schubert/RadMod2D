@@ -81,7 +81,7 @@ Q, G = tempsolver(m, vfmat, temp, epsilon)
 
 With the areas of the elements the heat flux density can be determined:
 ```julia
-area = [m.elem[i].area for i = m.elem2par[1].first:m.elem2par[end].last]
+area = [m.elements[i].length for i = m.elem2par[1].first:m.elem2par[end].last]
 q = Q[:] ./ area[:]
 ```
 <img src="img/fig_rect_in_rect_q2D.png" alt="heat-flux-density" width="400"/>

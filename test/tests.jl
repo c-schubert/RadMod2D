@@ -33,13 +33,13 @@ function test_mesh2D()
     # element analysis
     element_analysis(m, printit = true)
     # 2D plot
-    fig = Figure(resolution = (900, 900))
+    fig = Figure(size = (900, 900))
     ax = fig[1, 1] = Axis(fig)
     # ax.xlabelpadding = 0.0
     ax.xlabel = "X in m"
     ax.ylabel = "Y in m"
     ax.aspect = DataAspect()
-    plot_model(fig, ax, m, show_norm_vec = true, shownodes = false, showcom = false)
+    plot_model(fig, ax, m, show_norm_vec = true, show_nodes = false, show_com = false)
     display(fig)
 end
 
@@ -49,7 +49,7 @@ raycast2D - testing
 
 function test_raycast2D()
     # 2D plot
-    fig = Figure(resolution = (900, 900))
+    fig = Figure(size = (900, 900))
     ax = fig[1, 1] = Axis(fig)
     ax.xlabel = "X in m"
     ax.ylabel = "Y in m"
@@ -82,7 +82,7 @@ end
 function test_raycast2D_occ(;option = 3)
     # not correctly working because of missing Makie pkg in RadMod2D
     # 2D plot
-    fig = Figure(resolution = (900, 900))
+    fig = Figure(size = (900, 900))
     ax = fig[1, 1] = Axis(fig)
     ax.xlabel = "X in m"
     ax.ylabel = "Y in m"
@@ -135,7 +135,7 @@ function test_view2D_blocking_2elem()
     m = model_two_intesecting_circles(3.0, 120, 3)
     # m = model_circle_with_opening_line_centered(2.0, 360, 143)
     # 2D plot
-    fig = Figure(resolution = (900, 900))
+    fig = Figure(size = (900, 900))
     ax = fig[1, 1] = Axis(fig)
     ax.xlabel = "X in m"
     ax.ylabel = "Y in m"
@@ -146,18 +146,18 @@ function test_view2D_blocking_2elem()
     t_occ = check_tile_occupation(m, dx, dy, n)
     plot_empty_tiles(fig, ax, dx, dy, n)
     plot_occupied_tiles(fig, ax, dx, dy, n, t_occ)
-    plot_model(fig, ax, m, show_norm_vec = false, shownodes = false, showcom = false)
+    plot_model(fig, ax, m, show_norm_vec = false, show_nodes = false, show_com = false)
     # elem pair check
     i1 = 50
     i2 = 160
-    plot_model_elements(fig, ax, m, [i1,i2], show_norm_vec = true, shownodes = false, showcom = false)
+    plot_model_elements(fig, ax, m, [i1,i2], show_norm_vec = true, show_nodes = false, show_com = false)
     isexisting = are_elements_facing(m, m.elements[i1], m.elements[i2])
 
     (isexisting ? println("is existing between ", i1, " and ", i2) : 
             println("is not existing between ", i1, " and ", i2))
 
     if isexisting
-        linesegments!(ax, [Point2f0(m.elem[i1].com.x, m.elem[i1].com.y) => Point2f0(m.elem[i2].com.x, m.elem[i2].com.y)], color = :blue, linewidth = 3)
+        linesegments!(ax, [Point2f(m.elements[i1].com.x, m.elements[i1].com.y) => Point2f(m.elements[i2].com.x, m.elements[i2].com.y)], color = :blue, linewidth = 3)
         blocking_vf_with_tiles_2elem(fig, ax, i1, i2, m, dx, dy, n, t_occ)
     end
     display(fig)
@@ -183,14 +183,14 @@ function test_view2D_blocking_bf_vs_tiles()
     println(sum(diff))
     # findfirst(diff.==1.0)
     # 2D plot
-    # fig = Figure(resolution = (1400, 900))
+    # fig = Figure(size = (1400, 900))
     # ax = fig[1, 1] = Axis(fig)
     # ax.xlabel = "X in m"
     # ax.ylabel = "Y in m"
     # ax.aspect = DataAspect()
     # plot_empty_tiles(fig, ax, dx, dy, n)
     # plot_occupied_tiles(fig, ax, dx, dy, n, t_occ)
-    # plot_model(fig, ax, m, show_norm_vec = false, shownodes = false, showcom = false)
+    # plot_model(fig, ax, m, show_norm_vec = false, show_nodes = false, show_com = false)
     # plot_existing(fig, ax, m, 40, vfmat2)
     # display(fig)
 end
@@ -218,14 +218,14 @@ function test_view2D_vf()
     @time calculating_vf!(m, vfmat, normit = false)
     vfmatp = compact_vfmat_to_parts(m, vfmat, normit = false)
     #### 2D plot
-    fig = Figure(resolution = (1400, 900))
+    fig = Figure(size = (1400, 900))
     ax = fig[1, 1] = Axis(fig)
     ax.xlabel = "X in m"
     ax.ylabel = "Y in m"
     ax.aspect = DataAspect()
     # plot_empty_tiles(fig, ax, dx, dy, n)
     # plot_occupied_tiles(fig, ax, dx, dy, n, t_occ)
-    plot_model(fig, ax, m, show_norm_vec = false, shownodes = false, showcom = false)
+    plot_model(fig, ax, m, show_norm_vec = false, show_nodes = false, show_com = false)
     plot_existing(fig, ax, m, 170, vfmat)
     display(fig)
     #### post processing
@@ -248,14 +248,14 @@ function test_view2D_tiles(; n = 15)
     dx, dy = get_tile_dimensions(m, n)
     @time t_occ = check_tile_occupation(m, dx, dy, n)
     #### 2D plot
-    fig = Figure(resolution = (1400, 900))
+    fig = Figure(size = (1400, 900))
     ax = fig[1, 1] = Axis(fig)
     ax.xlabel = "X in m"
     ax.ylabel = "Y in m"
     ax.aspect = DataAspect()
     plot_empty_tiles(fig, ax, dx, dy, n)
     plot_occupied_tiles(fig, ax, dx, dy, n, t_occ)
-    plot_model(fig, ax, m, show_norm_vec = false, shownodes = false, showcom = false)
+    plot_model(fig, ax, m, show_norm_vec = false, show_nodes = false, show_com = false)
     display(fig)
 end
 
@@ -270,14 +270,14 @@ function test_view2D_shadow()
     @time t_occ = check_tile_occupation(m, dx, dy, n)
     @time blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
     # 2D plot
-    fig = Figure(resolution = (1400, 900))
+    fig = Figure(size = (1400, 900))
     ax = fig[1, 1] = Axis(fig)
     ax.xlabel = "X in m"
     ax.ylabel = "Y in m"
     ax.aspect = DataAspect()
     # plot_empty_tiles(fig, ax, dx, dy, n)
     # plot_occupied_tiles(fig, ax, dx, dy, n, t_occ)
-    # plot_model(fig, ax, m, show_norm_vec = true, shownodes = false, showcom = false)
+    # plot_model(fig, ax, m, show_norm_vec = true, show_nodes = false, show_com = false)
     # plot_existing(fig, ax, m, 150, vfmat)
     # plot_model_shadow_1to1(fig, ax, m, vfmat, 3, 8)
     plot_model_shadow_1toAll(fig, ax, m, vfmat, 3)
@@ -320,12 +320,12 @@ function test_therm2D()
     @time Qp, G = tempsolver(m, vfmat, temp, epsilon)
     Qp_parts = [sum(Qp[m.elem2par[i].first:m.elem2par[i].last,1]) for i = 1:m.no_parts]
     # 2D plot
-    fig = Figure(resolution = (1400, 900))
+    fig = Figure(size = (1400, 900))
     ax = fig[1, 1] = Axis(fig)
     ax.xlabel = "X in m"
     ax.ylabel = "Y in m"
     ax.aspect = DataAspect()
-    # plot_model(fig, ax, m, show_norm_vec = true, shownodes = false, showcom = false)
+    # plot_model(fig, ax, m, show_norm_vec = true, show_nodes = false, show_com = false)
     plot_model_with_value(fig, ax, m, Qp, "Wärmestrom in W", showcbar = false)
     display(fig)
 end

@@ -214,52 +214,20 @@ function tilewalk_with_check_for_occ_tiles(fig, ax, p1::Point2D{T1}, p2::Point2D
             # println("lcurrent: ",lcurrent)
             # plot next point
             p = p1 + lvec * lcurrent
-            scatter!(ax, Point2f0(p.x, p.y), color = pcolor, markersize = 15)
+            scatter!(ax, Point2f(p.x, p.y), color = pcolor, markersize = 15)
             println("next tile number: ", tile.x, ", ", tile.y)
             # check this tile
             if !ismissing(t_occ[tile.x, tile.y])
                 println("------> occupied ")
                 # plot hitting point
                 p = p1 + lvec * lcurrent
-                scatter!(ax, Point2f0(p.x, p.y), color = :blue, markersize = 15)
+                scatter!(ax, Point2f(p.x, p.y), color = :blue, markersize = 15)
                 break
             end
             # print tile in color
             poly!(ax, Rect((tile.x-1) * dx, (tile.y-1) * dy, dx, dy), color = (:blue, 0.3))
         end
     end
-end
-
-
-
-function tilewalk_with_return(fig, ax, p1::Point2D{T1}, p2::Point2D{T1}, dx::T1, dy::T1, 
-        n::T2)::Vector{Index2D{T2}} where {T1<:AbstractFloat, T2<:Integer}
-    # do tilewalk between two points and check for occupied tiles
-    max_steps = get_max_steps(n)
-    tile_list = Vector{Index2D{T2}}(undef,max_steps)
-    dir, ltot, lvec = get_vectors_for_tilewalk(p1, p2)
-    tile = get_start_tile(p1, dir, n, dx, dy)
-    println("start tile number: ", tile.x, ", ", tile.y)
-    hit = 1
-    tile_list[hit] = Index2D(tile.x, tile.y)
-    # print start tile in color
-    poly!(ax, Rect((tile.x-1) * dx, (tile.y-1) * dy, dx, dy), color = (:blue, 0.3))
-    # do walk
-    for step = 1:max_steps
-        lx, ly = get_lengths_to_next_tiles(p1, p2, dir, tile, dx, dy)
-        # check if end reached
-
-        if lx >= (ltot - _TOL) && ly >= (ltot - _TOL)
-            break
-        end
-        tile, lcurrent, pcolor = get_next_tile(tile, dir, lx, ly)
-        println("next tile number: ", tile.x, ", ", tile.y)
-        hit += 1
-        tile_list[hit] = Index2D(tile.x, tile.y)
-        # print tile in color
-        poly!(ax, Rect((tile.x-1) * dx, (tile.y-1) * dy, dx, dy), color = (:blue, 0.3))
-    end
-    return tile_list[1:hit]
 end
 
 

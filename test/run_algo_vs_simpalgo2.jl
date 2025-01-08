@@ -32,14 +32,14 @@ vfmatp_simp = compact_vfmat_to_parts(m, vfmat_simp, normit = false)
 
 
 #### 2D plot
-fig = Figure(resolution = (900, 900))
+fig = Figure(size = (900, 900))
 ax = fig[1, 1] = Axis(fig)
 ax.xlabel = "X in m"
 ax.ylabel = "Y in m"
 ax.aspect = DataAspect()
 plot_empty_tiles(fig, ax, dx, dy, n)
 plot_occupied_tiles(fig, ax, dx, dy, n, t_occ)
-plot_model(fig, ax, m, shownvec = true, shownodes = false, showcom = false, showleg = true)
+plot_model(fig, ax, m, show_norm_vec = true, show_nodes = false, show_com = false, show_leg = true)
 display(fig)
 
 

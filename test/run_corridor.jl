@@ -2,10 +2,8 @@ using RadMod2D
 
 include("./models2D.jl")
 
-
-filetype = ".svg"
-# CairoMakie.activate!(type = "png")
-# filetype = ".png"
+CairoMakie.activate!(type = "png")
+filetype = ".png"
 
 function fig_corridor_therm2D_eps(eps_lab)
     # test blocking with shadow plot
@@ -35,7 +33,7 @@ function fig_corridor_therm2D_eps(eps_lab)
     # lab_max = maximum(Qp[m.elem2par[2].first:m.elem2par[end].last,1])
     # println("Qp of labyrith between: ", lab_min, " and ", lab_max)
     # heat flux density
-    area = [m.elem[i].area for i = m.elem2par[1].first:m.elem2par[end].last]
+    area = [m.elements[i].length for i = m.elem2par[1].first:m.elem2par[end].last]
     qp_area = Qp[:] ./ area[:]
     qp_area_kw = qp_area ./ 1000
     lab_min = minimum(qp_area_kw[m.elem2par[2].first:m.elem2par[end].last,1])
@@ -46,7 +44,7 @@ function fig_corridor_therm2D_eps(eps_lab)
     qp_area_kw_mod[qp_area_kw.>=0.0] .= 0.0
     qp_area_kw_mod .*= (-1)
     # 2D plot
-    fig = Figure(resolution = (270, 400), font = "Arial", fontsize = 10)
+    fig = Figure(size = (270, 400), font = "Arial", fontsize = 10)
     ax = fig[1, 1] = Axis(fig)
     linewidth = 1.0
     setup_axis!(ax, linewidth)
@@ -74,7 +72,7 @@ function fig_corridor_therm2D_eps(eps_lab)
     #     println(m.nodes[i].x, ";", m.nodes[i].y)
     # end
     # for i = 1:m.no_elements
-    #     println(m.elem[i].node1, ";", m.elem[i].node2, ";", m.elem[i].com, ";", m.elem[i].nvec, ";", m.elem[i].area)
+    #     println(m.elements[i].node1, ";", m.elements[i].node2, ";", m.elements[i].com, ";", m.elements[i].nvec, ";", m.elements[i].length)
     # end
     # for i = 1:m.no_elements
     #     println(temp[i,:], ";", epsilon[i,:], ";", qp_area_kw_mod[i,:])
@@ -82,7 +80,7 @@ function fig_corridor_therm2D_eps(eps_lab)
 end
 
 # fig_corridor_therm2D_eps(0.0001)
-# fig_corridor_therm2D_eps(0.05)
+fig_corridor_therm2D_eps(0.05)
 # fig_corridor_therm2D_eps(0.75)
 
 # include("./test/run_corridor.jl")

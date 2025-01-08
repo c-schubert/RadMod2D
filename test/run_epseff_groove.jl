@@ -14,7 +14,7 @@ function epsilon_effective_groove()
             0.9999 357.19] 
     # cant calculate last position with phi = 1.0 therefore using 0.999
     # colors = [:red, :green, :blue, :orange, :cyan, :purple1]
-    colors = to_colormap(:rainbow, size(case,1))
+    colors = resample_cmap(:rainbow, size(case,1))
     plt_lin = Vector(undef,(size(case,1)))
     epsilon_ink = 0.01
     eps_eff = Matrix{Float64}(undef,round(Integer,1.0/epsilon_ink),2*size(case,1))
@@ -34,7 +34,7 @@ function epsilon_effective_groove()
         eps_eff[:,(2*i)] = eps_eff_t[:,2]
     end
     # 2D plot
-    # fig = Figure(resolution = (900, 700))
+    # fig = Figure(size = (900, 700))
     # ax = fig[1, 1] = Axis(fig)
     # ax.xlabel = "epsilon"
     # ax.ylabel = "epsilon effective"
@@ -76,7 +76,7 @@ function plot_epseff_groove_allinone()
             0.5 142.79;
             0.9999 357.19] 
     # cant calculate last position with phi = 1.0 therefore using 0.999
-    m = Vector{Model}(undef,size(case,1))
+    m = Vector{ConstModel}(undef,size(case,1))
     for i = 1:size(case,1)
         m[i] = model_circle_with_opening_line_centered(2.0, 360, round(Integer,case[i,2]))
     end
@@ -96,7 +96,7 @@ function plot_epseff_groove_allinone()
         arr[i,2] = c_col
     end
     # 2D plot
-    fig = Figure(resolution = (300, 300), font = "Arial", fontsize = 10)
+    fig = Figure(size = (300, 300), font = "Arial", fontsize = 10)
     for i = 1:size(case,1)
         ax = fig[arr[i,1], arr[i,2]] = Axis(fig)
         linewidth = 1.0
@@ -106,7 +106,7 @@ function plot_epseff_groove_allinone()
         ax.aspect = DataAspect()
         colors = Vector{Any}(undef,18)
         colors[:] .= :black
-        plot_model(fig, ax, m[i], shownvec = false, shownodes = false, showcom = false, showleg = false, colors = colors, linewidth = linewidth)
+        plot_model(fig, ax, m[i], show_norm_vec = false, show_nodes = false, show_com = false, show_leg = false, colors = colors, linewidth = linewidth)
     end
     # display(fig)
     save("fig_epseff_rundrille_allinone"*filetype, fig)
@@ -126,7 +126,7 @@ function plot_epseff_groove()
     m = model_circle_with_opening_line_centered(2.0, 360, round(Integer,case[i,2]))
     @show m.elem2par
     # 2D plot
-    fig = Figure(resolution = (270, 270), font = "Arial", fontsize = 15)
+    fig = Figure(size = (270, 270), font = "Arial", fontsize = 15)
     ax = fig[1, 1] = Axis(fig)
     linewidth = 1.0
     setup_axis!(ax, linewidth)
@@ -135,15 +135,15 @@ function plot_epseff_groove()
     ax.aspect = DataAspect()
     colors = Vector{Any}(undef,18)
     colors[:] .= :black
-    # plot_model(fig, ax, m, shownvec = false, shownodes = false, showcom = false, showleg = false, colors = colors, linewidth = linewidth)
-    plot_model_elements(fig, ax, m, 1:297, shownvec = false, shownodes = false, showcom = false, color = :black, linewidth = linewidth)
-    plot_model_elements(fig, ax, m, 298:361, shownvec = false, shownodes = false, showcom = false, color = :black, linewidth = linewidth, linestyle = :dot)
+    # plot_model(fig, ax, m, show_norm_vec = false, show_nodes = false, show_com = false, show_leg = false, colors = colors, linewidth = linewidth)
+    plot_model_elements(fig, ax, m, 1:297, show_norm_vec = false, show_nodes = false, show_com = false, color = :black, linewidth = linewidth)
+    plot_model_elements(fig, ax, m, 298:361, show_norm_vec = false, show_nodes = false, show_com = false, color = :black, linewidth = linewidth, linestyle = :dot)
     # display(fig)
     save("fig_epseff_rundrille_neu"*filetype, fig)
 end
 
-# epsilon_effective_groove()
-# plot_epseff_groove_allinone()
-# plot_epseff_groove()
+epsilon_effective_groove()
+plot_epseff_groove_allinone()
+plot_epseff_groove()
 
 # include("./test/run_epseff_groove.jl")

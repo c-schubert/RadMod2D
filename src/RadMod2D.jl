@@ -5,8 +5,6 @@ module RadMod2D
     using StaticArrays
     using LinearAlgebra
     using FastPow
-    # TODO: For now plotting included within package -> Later move to additional package
-    using GLMakie
 
     # TODO: image export functionality within plotting functions
     # using CairoMakie # for image export
@@ -43,15 +41,14 @@ module RadMod2D
     export calculating_vf!
     export get_area_of_part
     export get_tile_dimensions
-
+    export are_elements_facing
+    export check_tile_occupation
+    export line_segment_intersection
 
     include("./view2Dchecks.jl")
     # comapre elements checks
-    export blocking_vf_with_tiles_2elem
-    export blocking_vf_with_tiles_2elem_tiles
-    export check_tile_occupation
-    export check_tile_occupation_parts
     export tile_occ_analysis
+    export get_number_of_elements_in_tiles
 
     include("./view2Dpostproc.jl")
     export compact_vfmat_to_parts
@@ -61,12 +58,5 @@ module RadMod2D
     export sigma
     export set_bc_part!
     export tempsolver
-
-    include("./plot2D.jl")
-
-    export new_figure
-    export plot_model, plot_model_elements, plot_empty_tiles, plot_occupied_tiles, 
-        plot_points_and_connection, plot_existing, plot_model_shadow_1to1, 
-        plot_model_shadow_1toAll, plot_model_with_value, setup_axis!
 
 end

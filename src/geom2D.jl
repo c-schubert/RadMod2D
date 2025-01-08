@@ -51,8 +51,8 @@ end
 Creating rectangle with center. The rectangle is defined by the length in x and y and the center point c.
 
 #Arguments
-- `x::T1`: Length in x direction
-- `y::T1`: Length in y direction
+- `x_width::T1`: Length in x direction
+- `y_width::T1`: Length in y direction
 - `c::Point2D`: Center point of the rectangle
 
 #Keyword Arguments
@@ -65,14 +65,14 @@ Creating rectangle with center. The rectangle is defined by the length in x and 
 #Returns
 - Part defining the rectangle
 """
-function rectangle(x::T1, y::T1, c::Point2D; seedx::T2 = 10, seedy::T2 = 10, 
+function rectangle(x_width::T1, y_width::T1, c::Point2D; seedx::T2 = 10, seedy::T2 = 10, 
         dir::Symbol = :pos, name::String = "Rectangle")::Part where {T1<:Real, T2<:Integer}
 
     # creating rectangle with center
-    p1 = c + Point2D(-0.5*x, -0.5*y)
-    p2 = c + Point2D(-0.5*x, 0.5*y)
-    p3 = c + Point2D(0.5*x, 0.5*y)
-    p4 = c + Point2D(0.5*x, -0.5*y)
+    p1 = c + Point2D(-0.5*x_width, -0.5*y_width)
+    p2 = c + Point2D(-0.5*x_width, 0.5*y_width)
+    p3 = c + Point2D(0.5*x_width, 0.5*y_width)
+    p4 = c + Point2D(0.5*x_width, -0.5*y_width)
     dx = (p3.x - p2.x) / seedx
     dy = (p2.y - p1.y) / seedy
     no_nodes = 2*seedx + 2*seedy
