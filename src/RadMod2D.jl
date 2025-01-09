@@ -5,7 +5,9 @@ module RadMod2D
     using StaticArrays
     using LinearAlgebra
     using FastPow
+    using Printf
 
+    
     # TODO: image export functionality within plotting functions
     # using CairoMakie # for image export
     # CairoMakie.activate!(type = "svg")
@@ -53,6 +55,7 @@ module RadMod2D
     include("./view2Dpostproc.jl")
     export compact_vfmat_to_parts
     export save_vfmat_part_to_csv
+    export save_vfmat_part_to_german_csv
 
     include("./therm2D.jl")
     export sigma

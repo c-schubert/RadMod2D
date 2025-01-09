@@ -1,4 +1,4 @@
-using RadMod2D
+using .RadMod2D
 
 include("./models2D.jl")
 

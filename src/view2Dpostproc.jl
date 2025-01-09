@@ -83,4 +83,46 @@ function save_vfmat_part_to_csv(vfmat::Matrix{T}; filepath::String = ".",
         writedlm(io, header)
         writedlm(io, vfmat)
     end
+
+    return nothing
+end
+
+
+
+function save_vfmat_part_to_german_csv(vfmat::Matrix{T}; filepath::String = ".",
+        filename::String = "vfmat.csv", control = false, partmatrix=false,
+        model = nothing)::Nothing where T <: AbstractFloat
+
+    header = []
+
+    if partmatrix
+        header = Matrix{String}(undef, 1, size(vfmat,1))
+
+        for i = 1:size(vfmat,1)
+            header[1,i] = "p"*string(i)
+
+            if !isnothing(model)
+                header[1,i] *= ":"*model.part_names[i]
+            end
+        end
+    end
+
+    if control == true
+        control = sum(vfmat, dims=2)
+        vfmat = hcat(vfmat, control)
+        header = hcat(header, "control")
+    end
+
+    # Convert the matrix to a string format with a comma as the decimal separator
+    vfmat_str = map(x -> replace(@sprintf("%.16f", x), "." => ","), vfmat)
+
+    fp = joinpath(filepath, filename)
+    open(fp, "w") do io
+        if !isempty(header)
+            writedlm(io, header, ';')
+        end
+        writedlm(io, vfmat_str, ';')
+    end
+
+    return nothing
 end

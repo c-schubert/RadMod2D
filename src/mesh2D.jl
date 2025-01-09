@@ -7,7 +7,7 @@ LineElement normal vectors (norm_vec), center of mass (com) and length are preco
 at geometry generation for efficiency.
 
 For geometry generation, the model is mutable. After geometry generation, the model is
-made immutable for efficiency within the vief factor and blocking calculations.
+made immutable for efficiency within the view factor and blocking calculations.
 Therefore, two different structs are used.
 ###################################################### =# 
 
