@@ -34,7 +34,7 @@ end
 
 function plot_model(fig, ax, m::AbstractModel; show_norm_vec=false, show_nodes=false, 
         show_com=false, show_leg=true, colors=resample_cmap(:rainbow, m.no_parts), 
-        linewidth=3.0, leg_pos="bottom")
+        linewidth=3.0, leg_pos="bottom", norm_vec_scale = 0.05)
 
     elem_lines = Vector(undef, m.no_parts)
     plt_elem = Vector(undef, m.no_parts)
@@ -67,10 +67,9 @@ function plot_model(fig, ax, m::AbstractModel; show_norm_vec=false, show_nodes=f
             #             Point2f(m.elements[i].com.x + m.elements[i].norm_vec.x, m.elements[i].com.y + m.elements[i].norm_vec.y) for i in erange]
             # plt_norm_vec[p] = linesegments!(ax, norm_vec_lines, color = colors[p], linewidth = linewidth)
             # plot norm_vec as arrows
-            scale = 0.1 # default 0.3
-            arrowsize = 0.01 # default 0.05
-            local norm_vec_directions = [Point2f(m.elements[i].norm_vec.x * scale, m.elements[i].norm_vec.y * scale) for i in erange]
-            lw_arrow = linewidth * 0.5
+            arrowsize = 1.0
+            local norm_vec_directions = [Point2f(m.elements[i].norm_vec.x * norm_vec_scale, m.elements[i].norm_vec.y * norm_vec_scale) for i in erange]
+            lw_arrow = linewidth * 0.25
             arrows!(ax, com_points, norm_vec_directions, arrowcolor=colors[p], arrowsize=arrowsize, linecolor=colors[p], linewidth=lw_arrow)
         end
     end

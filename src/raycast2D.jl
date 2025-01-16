@@ -20,7 +20,6 @@ function get_vectors_for_tilewalk(p1::Point2D{T1},
     vec_norm = normit(vec)
 
     dirx::typeof(1) = 0
-
     if vec_norm.x > _TOL
         dirx = 1
     elseif vec_norm.x < ((-1) * _TOL)
@@ -46,33 +45,37 @@ function get_start_tile(p1::Point2D{T1}, dir::Index2D{T2}, n::T2, dx::T1,
     ty_step = 1
 
     if dir.x > 0
-        tx_step += floor(Integer,(p1.x + dir.x * _TOL) / dx)
+        tx_step += floor(T2, (p1.x + dir.x * _TOL) / dx)
     elseif dir.x < 0
-        tx_step += floor(Integer,(p1.x + dir.x * _TOL) / dx)
+        tx_step += floor(T2, (p1.x + dir.x * _TOL) / dx)
     else
         # wenn exakt auf einer tile Linie -> 1D walk
         # entscheidet Vorzeichen vor _TOL wo der Bucket liegt
         # wichtig wenn linie am Rand
         if p1.x > (dx * n - _TOL)
-            tx_step += floor(Integer,(p1.x - _TOL) / dx)
+            tx_step += floor(T2, (p1.x - _TOL) / dx)
         else
-            tx_step += floor(Integer,(p1.x + _TOL) / dx)
+            tx_step += floor(T2, (p1.x + _TOL) / dx)
         end
     end
     if dir.y > 0
-        ty_step += floor(Integer,(p1.y + dir.y * _TOL) / dy)
+        ty_step += floor(T2, (p1.y + dir.y * _TOL) / dy)
     elseif dir.y < 0
-        ty_step += floor(Integer,(p1.y + dir.y * _TOL) / dy)
+        ty_step += floor(T2, (p1.y + dir.y * _TOL) / dy)
     else
         # wenn exakt auf einer tile Linie -> 1D walk
         # entscheidet Vorzeichen vor _TOL wo der Bucket liegt
         # wichtig wenn linie am Rand
         if p1.y > (dy * n - _TOL)
-            ty_step += floor(Integer,(p1.y - _TOL) / dy)
+            ty_step += floor(T2, (p1.y - _TOL) / dy)
         else
-            ty_step += floor(Integer,(p1.y + _TOL) / dy)
+            ty_step += floor(T2, (p1.y + _TOL) / dy)
         end
     end
+
+    # @assert (tx_step > 0 && tx_step <= n)
+    # @assert (ty_step > 0 && ty_step <= n)
+
     return Index2D(tx_step, ty_step)
 end
 
@@ -237,6 +240,7 @@ function tilewalk_with_return!(tile_list::Vector{Index2D{T2}}, p1::Point2D{T1},
     # do tilewalk between two points and check for occupied tiles
     max_steps = get_max_steps(n)
     dir, ltot, lvec = get_vectors_for_tilewalk(p1, p2)
+
     tile = get_start_tile(p1, dir, n, dx, dy)
     hit = 1
     tile_list[hit] = tile
@@ -250,8 +254,14 @@ function tilewalk_with_return!(tile_list::Vector{Index2D{T2}}, p1::Point2D{T1},
         if lx >= (ltot - _TOL) && ly >= (ltot - _TOL)
             break
         end
+
         tile, nothing, nothing = get_next_tile(tile, dir, lx, ly)
         hit += 1
+
+        
+        @assert (tile.x > 0 && tile.x <= n)
+        @assert (tile.y > 0 && tile.y <= n)
+
         tile_list[hit] = tile
     end
     return hit

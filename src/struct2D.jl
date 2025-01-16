@@ -21,6 +21,10 @@ struct Index2D{T<:Integer} <: Pair2D{T}
     y::T
 end
 
+import Base: convert
+
+convert(::Type{Point2D}, x::Tuple{T,T}) where T <: Number = Point2D(x[1],x[2])
+
 import Base: size, getindex, unsafe_getindex, setindex!, unsafe_setindex!, +, -, *, /
 
 size(v::Pair2D) = (2, )
@@ -74,7 +78,7 @@ l-2 norm of vector
 """
 function norm(v::Point2D{T})::T where T<:AbstractFloat
     # l = LinearAlgebra.norm([v.x, v.y], 2.0)
-    @fastpow l = sqrt(v.x^2 + v.y^2)
+    l = sqrt(v.x^2 + v.y^2)
     return l
 end
 

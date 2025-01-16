@@ -13,7 +13,7 @@ module RadMod2D
     # CairoMakie.activate!(type = "svg")
 
 
-    const _TOL = 1E-12
+    const _TOL = 1E-8
     
     include("./struct2D.jl")
     export Point2D, Index2D

@@ -209,7 +209,7 @@ very slow (O ~ n^3) and should only be used for small models.
 function blocking_vf_brute_force!(m::ConstModel{T1, T2}, 
     vfmat::Matrix{T2})::Nothing where {T1<:Integer, T2<:AbstractFloat}
 
-    for i1 = 1:m.no_elements, i2 = (i1+1):m.no_elements
+    @inbounds for i1 = 1:m.no_elements, i2 = (i1+1):m.no_elements
         if isapprox(vfmat[i1,i2], 1.0)
             for ib in 1:m.no_elements
                 if ib != i1 && ib != i2
@@ -308,12 +308,12 @@ function blocking_vf_with_tiles!(m::ConstModel{T2, T1}, mat::Matrix{T1}, dx::T1,
             # first tilewalk and get all tiles between i1 and i2
             ntiles = tilewalk_with_return!(tiles, p1, p2, dx, dy, n)
             hitten = false
-            @inbounds for i = 1:ntiles
+            for i = 1:ntiles
                 t = tiles[i]
-                # println("next tile number: ", t.x, ", ", t.y)
+                println("next tile number: ", t.x, ", ", t.y)
                 if !ismissing(t_occ[t.x,t.y])
                     # println("------> occupied ")
-                    for it in t_occ[t.x,t.y]
+                    @inbounds for it in t_occ[t.x,t.y]
                         if it != i1 && it != i2
                             # println("------> ",i1," and ",i2, " checking with ",it)
                             p3 = m.nodes[m.elements[it].no_node1]
