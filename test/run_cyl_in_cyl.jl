@@ -97,7 +97,7 @@ function fig_c1_view2D_existing2()
     vfmat = zeros(Float64, m.no_elements, m.no_elements)
     @time existing_vf!(m, vfmat)
     n = 10
-    dx, dy = get_tile_dimensions(m, n)
+    dx, dy = get_tile_deltas(m, n)
     @time t_occ = check_tile_occupation(m, dx, dy, n)
     @time blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
     #### 2D plot
@@ -126,7 +126,7 @@ function fig_c1_view2D_blocking_occ()
     ax.aspect = DataAspect()
     # create tiles
     n = 15
-    dx, dy = get_tile_dimensions(m, n)
+    dx, dy = get_tile_deltas(m, n)
     t_occ = check_tile_occupation(m, dx, dy, n)
     plot_occupied_tiles(fig, ax, dx, dy, n, t_occ)
     plot_empty_tiles(fig, ax, dx, dy, n, linewidth = linewidth)
@@ -147,7 +147,7 @@ function fig_c1_view2D_blocking_2elem_tiles()
     ax.aspect = DataAspect()
     # create tiles
     n = 15
-    dx, dy = get_tile_dimensions(m, n)
+    dx, dy = get_tile_deltas(m, n)
     t_occ = check_tile_occupation(m, dx, dy, n)
     # plot_occupied_tiles(fig, ax, dx, dy, n, t_occ)
     # elem pair check
@@ -183,7 +183,7 @@ function fig_c1_view2D_blocking_2elem()
     ax.aspect = DataAspect()
     # create tiles
     n = 15
-    dx, dy = get_tile_dimensions(m, n)
+    dx, dy = get_tile_deltas(m, n)
     t_occ = check_tile_occupation(m, dx, dy, n)
     plot_occupied_tiles(fig, ax, dx, dy, n, t_occ)
     # elem pair check
@@ -276,7 +276,7 @@ function fig_c1_therm2D_qrad()
     vfmat = zeros(Float64, m.no_elements, m.no_elements)
     existing_vf!(m, vfmat)
     n = 15
-    dx, dy = get_tile_dimensions(m, n)
+    dx, dy = get_tile_deltas(m, n)
     t_occ = check_tile_occupation(m, dx, dy, n)
     blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
     calculating_vf!(m, vfmat, normit = true)
@@ -316,7 +316,7 @@ function fig_c1_therm2D_qrad_legend()
     vfmat = zeros(Float64, m.no_elements, m.no_elements)
     existing_vf!(m, vfmat)
     n = 15
-    dx, dy = get_tile_dimensions(m, n)
+    dx, dy = get_tile_deltas(m, n)
     t_occ = check_tile_occupation(m, dx, dy, n)
     blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
     calculating_vf!(m, vfmat, normit = true)
@@ -361,7 +361,7 @@ function calc_c1_view2D(;elemsize = 0.05)
     vfmat = zeros(Float64, m.no_elements, m.no_elements)
     @time existing_vf!(m, vfmat)
     n = 15
-    dx, dy = get_tile_dimensions(m, n)
+    dx, dy = get_tile_deltas(m, n)
     @time t_occ = check_tile_occupation(m, dx, dy, n)
     @time blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
     @time calculating_vf!(m, vfmat, normit = false)

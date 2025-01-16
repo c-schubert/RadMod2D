@@ -62,7 +62,7 @@ The view factors for the discretized geometry get calculated with:
 vfmat = zeros(Float64, m.no_elements, m.no_elements)
 existing_vf!(m, vfmat)
 n = 15
-dx, dy = get_tile_dimensions(m, n)
+dx, dy = get_tile_deltas(m, n)
 t_occ = check_tile_occupation(m, dx, dy, n)
 blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
 calculating_vf!(m, vfmat, normit = true)

@@ -13,7 +13,7 @@ m = model_rect_in_rect(r1x, r1y, r2x, r2y, elemsize)
 vfmat = zeros(Float64, m.no_elements, m.no_elements)
 @time existing_vf!(m, vfmat)
 n = 15
-dx, dy = get_tile_dimensions(m, n)
+dx, dy = get_tile_deltas(m, n)
 @time t_occ = check_tile_occupation(m, dx, dy, n)
 @time blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
 @time calculating_vf!(m, vfmat, normit = true)

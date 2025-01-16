@@ -16,7 +16,7 @@ module RadMod2D
     const _TOL = 1E-8
     
     include("./struct2D.jl")
-    export Point2D, Index2D
+    export Point2D, Index2D, Vector2D
     export norm, get_length
 
     include("./mesh2D.jl")
@@ -30,10 +30,16 @@ module RadMod2D
     export edge, rectangle, circle, circle_open, cosinus
 
     include("./raycast2D.jl")
+    export TileGrid
     export create_randomly_occupied_tiles
     export get_max_steps
     export tilewalk_with_check_for_occ_tiles
-    export tilewalk_with_return, tilewalk_with_return!
+    export tilewalk_with_return!
+    export get_tile_grid
+    export get_tile_grid_origin
+    export check_tile_occupation
+    export get_tile_deltas
+
 
     include("./view2D.jl")
     export existing_vf!
@@ -42,9 +48,7 @@ module RadMod2D
     export blocking_vf_with_tiles_simplified!
     export calculating_vf!
     export get_area_of_part
-    export get_tile_dimensions
     export are_elements_facing
-    export check_tile_occupation
     export line_segment_intersection
 
     include("./view2Dchecks.jl")

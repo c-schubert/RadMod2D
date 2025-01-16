@@ -6,33 +6,46 @@
 
 
 abstract type Pair2D{T<:Real} <: AbstractVector{T} end
-abstract type Vector2D{T<:Real} <: Pair2D{T} end
 
-struct Point2D{T<:AbstractFloat} <: Vector2D{T}
+struct Point2D{T<:AbstractFloat} <: Pair2D{T}
     x::T
     y::T
 end
 
-Point2D(x::Real, y::Real) = Point2D(promote(x,y)...)
-Point2D(x::Integer, y::Integer) = Point2D(convert(typeof(1.0),x), convert(typeof(1.0),y))
+struct Vector2D{T<:AbstractFloat} <: Pair2D{T}
+    x::T
+    y::T
+end
 
 struct Index2D{T<:Integer} <: Pair2D{T}
     x::T
     y::T
 end
 
+
+Point2D(x::Real, y::Real) = Point2D(promote(x,y)...)
+Point2D(x::Integer, y::Integer) = Point2D(convert(typeof(1.0),x), convert(typeof(1.0),y))
+
+Vector2D(x::Real, y::Real) = Vector2D(promote(x,y)...)
+Vector2D(x::Integer, y::Integer) = Vector2D(convert(typeof(1.0),x), convert(typeof(1.0),y))
+
+Index2D(x::Real, y::Real) = Index(convert(typeof(1),x), convert(typeof(1),y))
+
+
 import Base: convert
 
 convert(::Type{Point2D}, x::Tuple{T,T}) where T <: Number = Point2D(x[1],x[2])
+convert(::Type{Vector2D}, x::Tuple{T,T}) where T <: Number = Vector2D(x[1],x[2])
+convert(::Type{Index2D}, x::Tuple{T,T}) where T <: Number = Index2D(x[1],x[2])
 
 import Base: size, getindex, unsafe_getindex, setindex!, unsafe_setindex!, +, -, *, /
 
 size(v::Pair2D) = (2, )
-# looks like using perf if used as vector
+
+# looks like loosing perf if used as vector
 getindex(v::Pair2D, i::Int) = i < 3 ? (i == 1 ? v.x : v.y) : error("max index = 2")
 
 unsafe_getindex(v::Pair2D, i::Int) = (i == 1 ? v.x : v.y)
-
 
 function setindex!(v::Pair2D, a::Real, i::Integer)
     if i < 3
@@ -46,7 +59,6 @@ function setindex!(v::Pair2D, a::Real, i::Integer)
     end
     return v
 end
-
 
 
 function unsafe_setindex!(v::Pair2D, a::Real, i::Integer) 
@@ -65,7 +77,6 @@ end
 /(a::T1, b::T2) where {T1 <: Pair2D, T2 <: Real} = T1(a.x/b,a.y/b)
 
 
-
 """
     norm(v::Point2D)
 
@@ -77,6 +88,12 @@ l-2 norm of vector
 - `l<:AbstractFloat`: length of vector
 """
 function norm(v::Point2D{T})::T where T<:AbstractFloat
+    # l = LinearAlgebra.norm([v.x, v.y], 2.0)
+    l = sqrt(v.x^2 + v.y^2)
+    return l
+end
+
+function norm(v::Vector2D{T})::T where T<:AbstractFloat
     # l = LinearAlgebra.norm([v.x, v.y], 2.0)
     l = sqrt(v.x^2 + v.y^2)
     return l
@@ -95,6 +112,11 @@ Return normalized vector coordinates as Point2D
 - `vn::Point2D`: With normalized vector coordinates
 """
 function normit(v::Point2D{T})::Point2D{T} where T<:AbstractFloat
+    vn = v / norm(v)
+    return vn
+end
+
+function normit(v::Vector2D{T})::Vector2D{T} where T<:AbstractFloat
     vn = v / norm(v)
     return vn
 end

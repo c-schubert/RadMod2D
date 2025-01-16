@@ -28,8 +28,8 @@ no_inner = 12
 deg_start_center_outer = 0
 deg_start_center_inner = 5
 
-local inner_center = Point2D[]
-local outer_center = Point2D[]
+inner_center = Point2D[]
+outer_center = Point2D[]
 
 println(deg_start_center_inner)
 
@@ -79,16 +79,23 @@ plot_model(fig, ax, m_const, show_norm_vec = true, show_nodes = false, show_com 
 
 
 n = 20
-dx, dy = get_tile_dimensions(m_const, n)
+dx, dy = get_tile_deltas(m_const, n)
 vfmat = zeros(Float64, m_const.no_elements, m_const.no_elements)
 existing_vf!(m_const, vfmat)
+tile_orgin = get_tile_grid_origin(m_const)
+
+tiles = TileGrid(tile_orgin, Vector2D(dx,dy), Index2D(n,n))
+
 t_occ = check_tile_occupation(m_const, dx, dy, n)
 
-# this is working fine
-blocking_vf_brute_force!(m_const, vfmat)
 
-# this is not
-# blocking_vf_with_tiles!(m_const, vfmat, dx, dy, n, t_occ) # here is a bug somewhere / even if RadMod2D tests are running fine ...
+# Plots.spy(ismissing.(t_occ))
+
+# this is working fine
+# blocking_vf_brute_force!(m_const, vfmat)
+
+# this is not -> seems to be that tiles does not support negativ model coordinates -> modify tile model!!
+blocking_vf_with_tiles!(m_const, vfmat, dx, dy, n, t_occ) # here is a bug somewhere / even if RadMod2D tests are running fine ...
 
 calculating_vf!(m_const, vfmat, normit = false)
 vfmatp = compact_vfmat_to_parts(m_const, vfmat, normit = true)
@@ -102,5 +109,13 @@ vf_tube_to_inner_heaters = sum(vfmatp[1,end-(no_inner-1):end])
 avg_vf_outer_heater_to_tube = mean(vfmatp[3:2+no_outer,1])
 avg_vf_inner_heaters_to_tube = mean(vfmatp[end-(no_inner-1):end,1])
 
-save_vfmat_part_to_german_csv(vfmatp, filename="vfmatp_tubo.csv", partmatrix=true, model=m_const)
+
+println("vf_tube_to_tube $vf_tube_to_tube")
+println("vf_tube_to_rod $vf_tube_to_rod")
+println("vf_tube_to_outer_heaters $vf_tube_to_outer_heaters")
+println("vf_tube_to_inner_heaters $vf_tube_to_inner_heaters")
+println("avg_vf_outer_heater_to_tube $avg_vf_outer_heater_to_tube")
+println("avg_vf_inner_heaters_to_tube $avg_vf_inner_heaters_to_tube")
+
+# save_vfmat_part_to_german_csv(vfmatp, filename="vfmatp_tubo.csv", partmatrix=true, model=m_const)
 

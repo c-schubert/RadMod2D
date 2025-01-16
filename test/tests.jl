@@ -142,7 +142,7 @@ function test_view2D_blocking_2elem()
     ax.aspect = DataAspect()
     # create tiles
     n = 30
-    dx, dy = get_tile_dimensions(m, n)
+    dx, dy = get_tile_deltas(m, n)
     t_occ = check_tile_occupation(m, dx, dy, n)
     plot_empty_tiles(fig, ax, dx, dy, n)
     plot_occupied_tiles(fig, ax, dx, dy, n, t_occ)
@@ -175,7 +175,7 @@ function test_view2D_blocking_bf_vs_tiles()
     vfmat2 = zeros(Float64, m.no_elements, m.no_elements)
     existing_vf!(m, vfmat2)
     n = 10
-    dx, dy = get_tile_dimensions(m, n)
+    dx, dy = get_tile_deltas(m, n)
     @time t_occ = check_tile_occupation(m, dx, dy, n)
     @time blocking_vf_with_tiles!(m, vfmat2, dx, dy, n, t_occ)
     # check for difference
@@ -212,7 +212,7 @@ function test_view2D_vf()
     vfmat = zeros(Float64, m.no_elements, m.no_elements)
     @time existing_vf!(m, vfmat)
     n = 20
-    dx, dy = get_tile_dimensions(m, n)
+    dx, dy = get_tile_deltas(m, n)
     @time t_occ = check_tile_occupation(m, dx, dy, n)
     @time blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
     @time calculating_vf!(m, vfmat, normit = false)
@@ -245,7 +245,7 @@ function test_view2D_tiles(; n = 15)
     #### vfmat calculation
     vfmat = zeros(Float64, m.no_elements, m.no_elements)
     @time existing_vf!(m, vfmat)
-    dx, dy = get_tile_dimensions(m, n)
+    dx, dy = get_tile_deltas(m, n)
     @time t_occ = check_tile_occupation(m, dx, dy, n)
     #### 2D plot
     fig = Figure(size = (1400, 900))
@@ -266,7 +266,7 @@ function test_view2D_shadow()
     vfmat = zeros(Float64, m.no_elements, m.no_elements)
     existing_vf!(m, vfmat)
     n = 30
-    dx, dy = get_tile_dimensions(m, n)
+    dx, dy = get_tile_deltas(m, n)
     @time t_occ = check_tile_occupation(m, dx, dy, n)
     @time blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
     # 2D plot
@@ -286,7 +286,7 @@ end
 
 function test_tile_occ_analysis(;n = 10)
     m = model_circle_in_circle_centered(0.8, 1.6, 0.05)
-    dx, dy = get_tile_dimensions(m, n)
+    dx, dy = get_tile_deltas(m, n)
     @time t_occ = check_tile_occupation(m, dx, dy, n)
     # tile_occ_analysis(t_occ)
     t_max, t_min, t_mean, ratio = tile_occ_analysis(t_occ, printit = false)
@@ -305,7 +305,7 @@ function test_therm2D()
     vfmat = zeros(Float64, m.no_elements, m.no_elements)
     existing_vf!(m, vfmat)
     n = 30
-    dx, dy = get_tile_dimensions(m, n)
+    dx, dy = get_tile_deltas(m, n)
     t_occ = check_tile_occupation(m, dx, dy, n)
     blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
     calculating_vf!(m, vfmat, normit = true)
