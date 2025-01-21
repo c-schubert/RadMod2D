@@ -59,9 +59,23 @@ tmin_y, tmax_y).
 function is_line_segment_inside_tile_BB(n1::Point2D{T}, n2::Point2D{T}, tmin_x::T, tmax_x::T, 
         tmin_y::T, tmax_y::T)::Bool where T<:AbstractFloat
 
-    box1 = @SVector [min(n1.x, n2.x), max(n1.x, n2.x), min(n1.y, n2.y), max(n1.y, n2.y)]
-    box2 = @SVector[tmin_x, tmax_x, tmin_y, tmax_y]
-    return is_overlapping2D(box1, box2)
+    @no_escapce begin
+        box1 = @alloc(T, 4)
+        box2 = @alloc(T, 4)
+        # box1 = @SVector [min(n1.x, n2.x), max(n1.x, n2.x), min(n1.y, n2.y), max(n1.y, n2.y)]
+        # box2 = @SVector[tmin_x, tmax_x, tmin_y, tmax_y]
+        box1[1] = min(n1.x, n2.x)
+        box1[2] = max(n1.x, n2.x)
+        box1[3] = min(n1.y, n2.y)
+        box1[4] = max(n1.y, n2.y)
+
+        box2[1] = tmin_x
+        box2[2] = tmax_x
+        box2[3] = tmin_y
+        box2[4] = tmax_y
+
+        return is_overlapping2D(box1, box2)
+    end
 end
 
 
@@ -76,18 +90,36 @@ Checks if two 2D bounding boxes are overlapping.
 - `box2::Vector{T}`: second bounding box = [xmin, xmax; ymin, ymax]
 
 """
-function is_overlapping2D(box1::SVector{4,T}, box2::SVector{4,T})::Bool where T <: AbstractFloat
+function is_overlapping2D(box1::Vector{T}, box2::Vector{T})::Bool where T <: AbstractFloat
+# changed function is_overlapping2D(box1::SVector{4,T}, box2::SVector{4,T})::Bool where T <: AbstractFloat
 
-    box1x = @view box1[1:2]
-    box1y = @view box1[3:4]
-    box2x = @view box2[1:2]
-    box2y = @view box2[3:4]
-    inside = false
+    @no_escapce begin 
+        # box1x = @view box1[1:2]
+        # box1y = @view box1[3:4]
+        # box2x = @view box2[1:2]
+        # box2y = @view box2[3:4]
 
+        box1x = @alloc(T, 2)
+        box1y = @alloc(T, 2)
+        box2x = @alloc(T, 2)
+        box2y = @alloc(T, 2)
 
-    if is_overlapping1D(box1x, box2x) && is_overlapping1D(box1y, box2y)
-        inside = true
+        box1x[1] = box1[1]
+        box1x[2] = box1[2]
+        box1y[1] = box1[3]
+        box1y[2] = box1[4]
+        box2x[1] = box2[1]
+        box2x[2] = box2[2]
+        box2y[1] = box2[3]
+        box2y[2] = box2[4]
+
+        inside = false
+
+        if is_overlapping1D(box1x, box2x) && is_overlapping1D(box1y, box2y)
+            inside = true
+        end
     end
+
     return inside
 end
 
@@ -106,7 +138,8 @@ and box2 = [xmin, xmax].
 #Returns
 - `inside::Bool`: true if 1D "areas" are overlapping, false otherwise
 """
-function is_overlapping1D(box1::SubArray,box2::SubArray)::Bool
+function is_overlapping1D(box1::Vector{T},box2::Vector{T})::Bool where T <: AbstractFloat
+ # changed   function is_overlapping1D(box1::SubArray,box2::SubArray)::Bool
 
     xmin1 = box1[1]
     xmax1 = box1[2]

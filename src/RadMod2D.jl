@@ -6,6 +6,7 @@ module RadMod2D
     using LinearAlgebra
     using FastPow
     using Printf
+    using Bumper
 
     
     # TODO: image export functionality within plotting functions

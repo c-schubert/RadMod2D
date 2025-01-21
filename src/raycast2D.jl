@@ -122,8 +122,6 @@ function check_tile_occupation(m::ConstModel{T1, T2}, dx::T2, dy::T2, n::T1;
     return check_tile_occupation(m, tiles, blockparts=blockparts)
 end
 
-
-
 import Base: ismissing
 
 function ismissing(tile_occ_matrix::Matrix{Union{Missing, Vector{Integer}}})::Matrix{Bool, Bool}
@@ -138,27 +136,24 @@ function ismissing(tile_occ_matrix::Matrix{Union{Missing, Vector{Integer}}})::Ma
         end
     end
 
-    println("TestiTest")
-
     return missing_mat
 end
 
 
-
-
-function blocking_vf_with_tiles!(m::ConstModel{T2, T1}, mat::Matrix{T1}, dx::T1, dy::T1, n::T2, 
-            t_occ::Matrix{Union{Vector{T2},Missing}})::Nothing where {T1<:AbstractFloat, T2<:Integer}
+function blocking_vf_with_tiles!(m::ConstModel{T2, T1}, mat::Matrix{T1}, 
+        tg::OccupiedTileGrid{T2, T1})::Nothing where {T1<:AbstractFloat, T2<:Integer}
 
     # check if element pairs are blocked by others with tiles
-    max_steps = get_max_steps(n)
+    max_steps = get_max_steps(tg.n.x, tg.n.y)
     tiles = Vector{Index2D{T2}}(undef,max_steps)
+
     @inbounds for i1 = 1:m.no_elements, i2 = (i1+1):m.no_elements
         # println("--------> checking ",i1," and ",i2) 
         p1 = m.elements[i1].com
         p2 = m.elements[i2].com
         if isapprox(mat[i1,i2], 1.0)
             # first tilewalk and get all tiles between i1 and i2
-            ntiles = tilewalk_with_return!(tiles, p1, p2, dx, dy, n)
+            ntiles = tilewalk_with_return!(tiles, p1, p2, tg.del.x, tg.del.y, tg.nx, tg.ny)
             hitten = false
             for i = 1:ntiles
                 t = tiles[i]
@@ -225,9 +220,38 @@ function get_vectors_for_tilewalk(p1::Point2D{T1},
     return Index2D(dirx, diry), vec_l, vec_norm
 end
 
+function find_grid_point(p1::Point2D{T1}, tg::TileGrid{T2, T1};epsilon = _TOL) where {T1<:AbstractFloat, T2 <: Integer}
+    px = p1.x
+    py = p2.x
+
+    x0 = tg.origin.x
+    y0 = tg.origin.y
+
+    dx = tg.del.x
+    dy = tg.del.y
+
+    # Berechnung der Zellenindizes (i, j)
+    i = (px - x0) / dx
+    j = (py - y0) / dy
+    
+    # Toleranzprüfung und Runden der Indizes, wenn der Punkt nahe der Gitterposition ist
+    if abs(px - (x0 + i * dx)) < epsilon
+        i = round(i)  # Runden auf den nächsten Zellindex
+    end
+    
+    if abs(py - (y0 + j * dy)) < epsilon
+        j = round(j)  # Runden auf den nächsten Zellindex
+    end
+    
+    # Berechnung der tatsächlichen Position im Gitter
+    x = x0 + i * dx
+    y = y0 + j * dy
+    
+    return (x, y), (i, j)
+end
 
 
-function get_start_tile(p1::Point2D{T1}, dir::Index2D{T2}, n::T2, dx::T1, 
+function get_start_tile(p1::Point2D{T1}, dir::Index2D{T2}, nx::T2, ny::T2, dx::T1, 
         dy::T1)::Index2D{T2} where {T1<:AbstractFloat, T2 <: Integer}
     # get tile of starting point
     tx_step = 1
@@ -327,6 +351,10 @@ function get_next_tile(tile::Index2D{T2}, dir::Index2D{T2}, lx::T1,
     # bei einem 2D Fall exakt durch die Knoten entscheidet 
     # hier < und <= welche Seite das next tile liegt
     # default von mir: < geht immer in nächste y richtung
+
+    # TODO Changes for non quad grid?!!!
+
+
     if abs(lx) < abs(ly)
         # println("moving in x direction")
         tile_new = tile + Index2D(dir.x, 0)
@@ -367,22 +395,26 @@ function create_randomly_occupied_tiles(n::T; density = 0.1)::Matrix{Union{Vecto
 end
 
 
-
 @inline function get_max_steps(n::T)::T where T<:Integer
     @fastpow m1 = round(T,sqrt(n^2+n^2)*2)
     # m2 = convert(typeof(n),m1)
     return m1
 end
 
+@inline function get_max_steps(nx::T,ny::T)::T where T<:Integer
+    @fastpow m1 = round(T,sqrt(nx^2+ny^2)*2)
+    # m2 = convert(typeof(n),m1)
+    return m1
+end
 
 
 function tilewalk_with_return!(tile_list::Vector{Index2D{T2}}, p1::Point2D{T1}, 
-        p2::Point2D{T1}, dx::T1, dy::T1, n::T2)::T2 where {T1<:AbstractFloat, T2<:Integer}
+        p2::Point2D{T1}, dx::T1, dy::T1, nx::T2, ny::T2)::T2 where {T1<:AbstractFloat, T2<:Integer}
     # do tilewalk between two points and check for occupied tiles
     max_steps = get_max_steps(n)
     dir, ltot, lvec = get_vectors_for_tilewalk(p1, p2)
 
-    tile = get_start_tile(p1, dir, n, dx, dy)
+    tile = get_start_tile(p1, dir, nx, ny, dx, dy)
     hit = 1
     tile_list[hit] = tile
     for step = 1:max_steps # do walk
@@ -398,7 +430,6 @@ function tilewalk_with_return!(tile_list::Vector{Index2D{T2}}, p1::Point2D{T1},
 
         tile, nothing, nothing = get_next_tile(tile, dir, lx, ly)
         hit += 1
-
         
         @assert (tile.x > 0 && tile.x <= n)
         @assert (tile.y > 0 && tile.y <= n)
