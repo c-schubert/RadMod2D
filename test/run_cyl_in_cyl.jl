@@ -98,7 +98,7 @@ function fig_c1_view2D_existing2()
     @time existing_vf!(m, vfmat)
     n = 10
     dx, dy = get_tile_deltas(m, n)
-    @time t_occ = check_tile_occupation(m, dx, dy, n)
+    @time t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
     @time blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
     #### 2D plot
     fig = Figure(size = (900,900), font = "Arial", fontsize = 10)
@@ -127,7 +127,7 @@ function fig_c1_view2D_blocking_occ()
     # create tiles
     n = 15
     dx, dy = get_tile_deltas(m, n)
-    t_occ = check_tile_occupation(m, dx, dy, n)
+    t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
     plot_occupied_tiles(fig, ax, dx, dy, n, t_occ)
     plot_empty_tiles(fig, ax, dx, dy, n, linewidth = linewidth)
     plot_model(fig, ax, m, show_norm_vec = true, show_nodes = false, show_com = false, show_leg = false, colors = [:black, :black], linewidth = linewidth)
@@ -148,7 +148,7 @@ function fig_c1_view2D_blocking_2elem_tiles()
     # create tiles
     n = 15
     dx, dy = get_tile_deltas(m, n)
-    t_occ = check_tile_occupation(m, dx, dy, n)
+    t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
     # plot_occupied_tiles(fig, ax, dx, dy, n, t_occ)
     # elem pair check
     i1 = 90
@@ -184,7 +184,7 @@ function fig_c1_view2D_blocking_2elem()
     # create tiles
     n = 15
     dx, dy = get_tile_deltas(m, n)
-    t_occ = check_tile_occupation(m, dx, dy, n)
+    t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
     plot_occupied_tiles(fig, ax, dx, dy, n, t_occ)
     # elem pair check
     i1 = 90
@@ -277,7 +277,7 @@ function fig_c1_therm2D_qrad()
     existing_vf!(m, vfmat)
     n = 15
     dx, dy = get_tile_deltas(m, n)
-    t_occ = check_tile_occupation(m, dx, dy, n)
+    t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
     blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
     calculating_vf!(m, vfmat, normit = true)
     # solve Qp
@@ -317,7 +317,7 @@ function fig_c1_therm2D_qrad_legend()
     existing_vf!(m, vfmat)
     n = 15
     dx, dy = get_tile_deltas(m, n)
-    t_occ = check_tile_occupation(m, dx, dy, n)
+    t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
     blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
     calculating_vf!(m, vfmat, normit = true)
     # solve Qp
@@ -362,7 +362,7 @@ function calc_c1_view2D(;elemsize = 0.05)
     @time existing_vf!(m, vfmat)
     n = 15
     dx, dy = get_tile_deltas(m, n)
-    @time t_occ = check_tile_occupation(m, dx, dy, n)
+    @time t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
     @time blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
     @time calculating_vf!(m, vfmat, normit = false)
     vfmatp = compact_vfmat_to_parts(m, vfmat, normit = false)

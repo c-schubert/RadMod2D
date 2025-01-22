@@ -11,7 +11,7 @@ m = model_line_to_line_with_obstacles(1.0, 1.0, 0.5, 6, elemsize)
 
 # tiles
 dx, dy = get_tile_deltas(m, n)
-t_occ = check_tile_occupation(m, dx, dy, n, blockparts = 3:m.no_parts)
+t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n, blockparts = 3:m.no_parts)
 tile_occ_analysis(t_occ, printit = true)
 
 println("elem size / tile size: ", round(elemsize/((dx+dy)/2), digits = 2), " %")

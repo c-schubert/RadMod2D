@@ -143,7 +143,7 @@ function test_view2D_blocking_2elem()
     # create tiles
     n = 30
     dx, dy = get_tile_deltas(m, n)
-    t_occ = check_tile_occupation(m, dx, dy, n)
+    t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
     plot_empty_tiles(fig, ax, dx, dy, n)
     plot_occupied_tiles(fig, ax, dx, dy, n, t_occ)
     plot_model(fig, ax, m, show_norm_vec = false, show_nodes = false, show_com = false)
@@ -176,7 +176,7 @@ function test_view2D_blocking_bf_vs_tiles()
     existing_vf!(m, vfmat2)
     n = 10
     dx, dy = get_tile_deltas(m, n)
-    @time t_occ = check_tile_occupation(m, dx, dy, n)
+    @time t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
     @time blocking_vf_with_tiles!(m, vfmat2, dx, dy, n, t_occ)
     # check for difference
     diff = vfmat2 .- vfmat
@@ -213,7 +213,7 @@ function test_view2D_vf()
     @time existing_vf!(m, vfmat)
     n = 20
     dx, dy = get_tile_deltas(m, n)
-    @time t_occ = check_tile_occupation(m, dx, dy, n)
+    @time t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
     @time blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
     @time calculating_vf!(m, vfmat, normit = false)
     vfmatp = compact_vfmat_to_parts(m, vfmat, normit = false)
@@ -246,7 +246,7 @@ function test_view2D_tiles(; n = 15)
     vfmat = zeros(Float64, m.no_elements, m.no_elements)
     @time existing_vf!(m, vfmat)
     dx, dy = get_tile_deltas(m, n)
-    @time t_occ = check_tile_occupation(m, dx, dy, n)
+    @time t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
     #### 2D plot
     fig = Figure(size = (1400, 900))
     ax = fig[1, 1] = Axis(fig)
@@ -267,7 +267,7 @@ function test_view2D_shadow()
     existing_vf!(m, vfmat)
     n = 30
     dx, dy = get_tile_deltas(m, n)
-    @time t_occ = check_tile_occupation(m, dx, dy, n)
+    @time t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
     @time blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
     # 2D plot
     fig = Figure(size = (1400, 900))
@@ -287,7 +287,7 @@ end
 function test_tile_occ_analysis(;n = 10)
     m = model_circle_in_circle_centered(0.8, 1.6, 0.05)
     dx, dy = get_tile_deltas(m, n)
-    @time t_occ = check_tile_occupation(m, dx, dy, n)
+    @time t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
     # tile_occ_analysis(t_occ)
     t_max, t_min, t_mean, ratio = tile_occ_analysis(t_occ, printit = false)
 end
@@ -306,7 +306,7 @@ function test_therm2D()
     existing_vf!(m, vfmat)
     n = 30
     dx, dy = get_tile_deltas(m, n)
-    t_occ = check_tile_occupation(m, dx, dy, n)
+    t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
     blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
     calculating_vf!(m, vfmat, normit = true)
     # solve Qp

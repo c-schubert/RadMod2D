@@ -25,7 +25,7 @@ function epsilon_effective_groove()
         existing_vf!(m, vfmat)
         n = 30
         dx, dy = get_tile_deltas(m, n)
-        @time t_occ = check_tile_occupation(m, dx, dy, n)
+        @time t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
         @time blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
         calculating_vf!(m, vfmat, normit = true)
         # epsilon effective

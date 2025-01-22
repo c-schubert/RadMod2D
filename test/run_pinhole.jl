@@ -11,7 +11,7 @@ function fig_pinhole_therm2D_eps(eps_lab)
     existing_vf!(m, vfmat)
     n = 30
     dx, dy = get_tile_deltas(m, n)
-    @time t_occ = check_tile_occupation(m, dx, dy, n)
+    @time t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
     @time blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
     @time calculating_vf!(m, vfmat, normit = true)
     # solve Qp

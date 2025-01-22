@@ -30,7 +30,7 @@ plot_model(fig1, ax1, m, show_norm_vec = true, show_nodes = false, show_com = fa
 vfmat = zeros(Float64, m.no_elements, m.no_elements)
 existing_vf!(m, vfmat)
 dx, dy = get_tile_deltas(m, n)
-t_occ = check_tile_occupation(m, dx, dy, n)
+t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
 blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
 calculating_vf!(m, vfmat, normit = true)
 

@@ -86,7 +86,7 @@ tile_orgin = get_tile_grid_origin(m_const)
 
 tiles = TileGrid(tile_orgin, Vector2D(dx,dy), Index2D(n,n))
 
-t_occ = check_tile_occupation(m_const, dx, dy, n)
+t_occ = get_occmat_of_elements_in_tilegrid(m_const, dx, dy, n)
 
 
 # Plots.spy(ismissing.(t_occ))

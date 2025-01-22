@@ -12,7 +12,7 @@ struct Point2D{T<:AbstractFloat} <: Pair2D{T}
     y::T
 end
 
-struct Vector2D{T<:AbstractFloat} <: Pair2D{T}
+struct Vector2D{T<:Real} <: Pair2D{T}
     x::T
     y::T
 end

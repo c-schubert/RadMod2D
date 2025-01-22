@@ -37,49 +37,6 @@ function line_segment_intersection(p1::Point2D{T}, p2::Point2D{T}, p3::Point2D{T
 end
 
 
-
-"""
-    is_line_segment_inside_tile_BB(n1::Point2D{T}, n2::Point2D{T}, tmin_x::T, tmax_x::T, 
-        tmin_y::T, tmax_y::T)::Bool where T<:AbstractFloat
-
-Checks if line segment (n1 -> n2) is inside tile with bounding box (tmin_x, tmax_x,
-tmin_y, tmax_y).
-
-#Arguments
-- `n1::Point2D{T}`: first point of line segment
-- `n2::Point2D{T}`: second point of line segment
-- `tmin_x::T`: minimum x coordinate of tile bounding box
-- `tmax_x::T`: maximum x coordinate of tile bounding box
-- `tmin_y::T`: minimum y coordinate of tile bounding box
-- `tmax_y::T`: maximum y coordinate of tile bounding box
-
-#Returns
-- `is_inside::Bool`: true if line segment is inside tile bounding box, false otherwises
-"""
-function is_line_segment_inside_tile_BB(n1::Point2D{T}, n2::Point2D{T}, tmin_x::T, tmax_x::T, 
-        tmin_y::T, tmax_y::T)::Bool where T<:AbstractFloat
-
-    @no_escapce begin
-        box1 = @alloc(T, 4)
-        box2 = @alloc(T, 4)
-        # box1 = @SVector [min(n1.x, n2.x), max(n1.x, n2.x), min(n1.y, n2.y), max(n1.y, n2.y)]
-        # box2 = @SVector[tmin_x, tmax_x, tmin_y, tmax_y]
-        box1[1] = min(n1.x, n2.x)
-        box1[2] = max(n1.x, n2.x)
-        box1[3] = min(n1.y, n2.y)
-        box1[4] = max(n1.y, n2.y)
-
-        box2[1] = tmin_x
-        box2[2] = tmax_x
-        box2[3] = tmin_y
-        box2[4] = tmax_y
-
-        return is_overlapping2D(box1, box2)
-    end
-end
-
-
-
 """
     is_overlapping2D(box1::Vector{T}, box2::Vector{T}) where T <: AbstractFloat
 
@@ -90,35 +47,35 @@ Checks if two 2D bounding boxes are overlapping.
 - `box2::Vector{T}`: second bounding box = [xmin, xmax; ymin, ymax]
 
 """
-function is_overlapping2D(box1::Vector{T}, box2::Vector{T})::Bool where T <: AbstractFloat
-# changed function is_overlapping2D(box1::SVector{4,T}, box2::SVector{4,T})::Bool where T <: AbstractFloat
+# function is_overlapping2D(box1::Vector{T}, box2::Vector{T})::Bool where T <: AbstractFloat
+function is_overlapping2D(box1::SVector{4,T}, box2::SVector{4,T})::Bool where T <: AbstractFloat
 
-    @no_escapce begin 
-        # box1x = @view box1[1:2]
-        # box1y = @view box1[3:4]
-        # box2x = @view box2[1:2]
-        # box2y = @view box2[3:4]
+    # @no_escape begin 
+        box1x = @view box1[1:2]
+        box1y = @view box1[3:4]
+        box2x = @view box2[1:2]
+        box2y = @view box2[3:4]
 
-        box1x = @alloc(T, 2)
-        box1y = @alloc(T, 2)
-        box2x = @alloc(T, 2)
-        box2y = @alloc(T, 2)
+        # box1x = @alloc(T, 2)
+        # box1y = @alloc(T, 2)
+        # box2x = @alloc(T, 2)
+        # box2y = @alloc(T, 2)
 
-        box1x[1] = box1[1]
-        box1x[2] = box1[2]
-        box1y[1] = box1[3]
-        box1y[2] = box1[4]
-        box2x[1] = box2[1]
-        box2x[2] = box2[2]
-        box2y[1] = box2[3]
-        box2y[2] = box2[4]
+        # box1x[1] = box1[1]
+        # box1x[2] = box1[2]
+        # box1y[1] = box1[3]
+        # box1y[2] = box1[4]
+        # box2x[1] = box2[1]
+        # box2x[2] = box2[2]
+        # box2y[1] = box2[3]
+        # box2y[2] = box2[4]
 
         inside = false
 
         if is_overlapping1D(box1x, box2x) && is_overlapping1D(box1y, box2y)
             inside = true
         end
-    end
+    # end
 
     return inside
 end
@@ -138,8 +95,8 @@ and box2 = [xmin, xmax].
 #Returns
 - `inside::Bool`: true if 1D "areas" are overlapping, false otherwise
 """
-function is_overlapping1D(box1::Vector{T},box2::Vector{T})::Bool where T <: AbstractFloat
- # changed   function is_overlapping1D(box1::SubArray,box2::SubArray)::Bool
+# function is_overlapping1D(box1::Vector{T},box2::Vector{T})::Bool where T <: AbstractFloat
+function is_overlapping1D(box1::SubArray,box2::SubArray)::Bool
 
     xmin1 = box1[1]
     xmax1 = box1[2]

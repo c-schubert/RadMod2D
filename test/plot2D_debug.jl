@@ -62,7 +62,7 @@ function tilewalk_with_return(fig, ax, p1::Point2D{T1}, p2::Point2D{T1}, dx::T1,
     max_steps = get_max_steps(n)
     tile_list = Vector{Index2D{T2}}(undef,max_steps)
     dir, ltot, lvec = get_vectors_for_tilewalk(p1, p2)
-    tile = get_start_tile(p1, dir, n, dx, dy)
+    tile = find_grid_point(p1, dir, n, dx, dy)
     println("start tile number: ", tile.x, ", ", tile.y)
     hit = 1
     tile_list[hit] = Index2D(tile.x, tile.y)
@@ -95,7 +95,7 @@ function tilewalk_with_check_for_occ_tiles(fig, ax, p1::Point2D{T1}, p2::Point2D
 
 # do tilewalk between two points and check for occupied tiles
 dir, ltot, lvec = get_vectors_for_tilewalk(p1, p2)
-tile = get_start_tile(p1, dir, n, dx, dy)
+tile = find_grid_point(p1, dir, n, dx, dy)
 println("start tile number: ", tile.x, ", ", tile.y)
 max_steps = get_max_steps(n)
 if !ismissing(t_occ[tile.x, tile.y])

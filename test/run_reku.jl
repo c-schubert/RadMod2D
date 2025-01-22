@@ -38,7 +38,7 @@ function calc_vf(m)
     existing_vf!(m, vfmat)
     n = 20
     dx, dy = get_tile_deltas(m, n)
-    t_occ = check_tile_occupation(m, dx, dy, n)
+    t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
     blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
     calculating_vf!(m, vfmat, normit = false)
     vfmatp = vfmat_to_parts(m, vfmat, normit = true)
@@ -53,7 +53,7 @@ function calc_q(m)
     existing_vf!(m, vfmat)
     n = 20
     dx, dy = get_tile_deltas(m, n)
-    t_occ = check_tile_occupation(m, dx, dy, n)
+    t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
     blocking_vf_with_tiles!(m, vfmat, dx, dy, n, t_occ)
     calculating_vf!(m, vfmat, normit = true)
     # net radiation method
