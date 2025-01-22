@@ -105,7 +105,7 @@ function is_overlapping1D(box1::SubArray,box2::SubArray)::Bool
 
     inside::Bool = false
 
-    if xmax1 >= xmin2 && xmax2 >= xmin1
+    if xmax1 >= xmin2 && xmin1 <= xmax1
         inside = true
     end
 

@@ -63,6 +63,19 @@ function is_line_segment_inside_tile_BB(n1::Point2D{T}, n2::Point2D{T}, tmin_x::
 end
 
 
+function is_line_segment_inside_tile_BB_new(n1::Point2D{T}, n2::Point2D{T}, tmin_x::T, tmax_x::T, 
+    tmin_y::T, tmax_y::T)::Bool where T<:AbstractFloat
+
+    return (is_point_inside_rectangle(n1, tmin_x, tmax_x, tmin_y, tmax_y) ||
+        is_point_inside_rectangle(n2, tmin_x, tmax_x, tmin_y, tmax_y))
+end
+
+
+
+function is_point_inside_rectangle(p::Point2D{T}, recminx::T, recmaxx::T, recminy::T, recmaxy::T) where T <: AbstractFloat
+    return recminx <= p.x <= recmaxx && recminy <= p.y <= recmaxy
+end
+
 
 """
     get_tile_deltas(m::ConstModel, nx::Integer, ny::Integer)::Tuple
@@ -144,7 +157,7 @@ function get_occmat_of_elements_in_tilegrid(m::ConstModel{T1, T2}, tg::TileGrid{
                 for i = e1:e2
                     no_node1 = m.nodes[m.elements[i].no_node1]
                     no_node2 = m.nodes[m.elements[i].no_node2]
-                    if is_line_segment_inside_tile_BB(no_node1, no_node2, tmin_x, 
+                    if is_line_segment_inside_tile_BB_new(no_node1, no_node2, tmin_x, 
                                 tmax_x, tmin_y, tmax_y)
                         hit += 1
                         element_inside_tile_no[hit] = i
