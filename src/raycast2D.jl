@@ -66,15 +66,34 @@ end
 function is_line_segment_inside_tile_BB_new(n1::Point2D{T}, n2::Point2D{T}, tmin_x::T, tmax_x::T, 
     tmin_y::T, tmax_y::T)::Bool where T<:AbstractFloat
 
-    return (is_point_inside_rectangle(n1, tmin_x, tmax_x, tmin_y, tmax_y) ||
-        is_point_inside_rectangle(n2, tmin_x, tmax_x, tmin_y, tmax_y))
+
+    # this was not completly correct in case of edges both points may not be in tile
+    # even if line of element is crossing tile code:
+    #  return (is_point_inside_rectangle(n1,
+    #     tmin_x, tmax_x, tmin_y, tmax_y) || is_point_inside_rectangle(n2, tmin_x,
+    #     tmax_x, tmin_y, tmax_y))
+
+    # this may overpredict, but should be much faster than real line intersection with
+    # tile borders
+    # return do_rectangles_overlap(n1.x, n1.y, n2.x, n2.y, tmin_x, tmax_x, tmin_y, tmax_y)
+
+
+     return (is_point_inside_rectangle(n1,
+        tmin_x, tmax_x, tmin_y, tmax_y) || is_point_inside_rectangle(n2, tmin_x,
+        tmax_x, tmin_y, tmax_y) || is_point_inside_rectangle(Point2D(n1.x, n2.y), tmin_x,
+        tmax_x, tmin_y, tmax_y) || is_point_inside_rectangle(Point2D(n2.x, n1.y), tmin_x,
+        tmax_x, tmin_y, tmax_y))
+
 end
 
 
 
-function is_point_inside_rectangle(p::Point2D{T}, recminx::T, recmaxx::T, recminy::T, recmaxy::T) where T <: AbstractFloat
+@inline function is_point_inside_rectangle(p::Point2D{T}, recminx::T, recmaxx::T, 
+        recminy::T, recmaxy::T; tol::T = _TOL)::Bool where T <: AbstractFloat
     return recminx <= p.x <= recmaxx && recminy <= p.y <= recmaxy
 end
+
+
 
 
 """
@@ -87,8 +106,8 @@ function get_tile_deltas(m::ConstModel{T1, T2}, nx::Integer, ny::Integer; tol::T
     # create tiles based on model nodes
     # get min and max x and y of nodes
     nmin, nmax = get_min_max_coordinates(m)
-    delta_x::T2 = ((nmax.x - nmin.x) + 2*tol) / nx
-    delta_y::T2 = ((nmax.y - nmin.y) + 2*tol) / ny
+    delta_x::T2 = ((nmax.x - nmin.x)) / nx
+    delta_y::T2 = ((nmax.y - nmin.y)) / ny
     return delta_x, delta_y
 end
 
@@ -103,9 +122,10 @@ end
 Sets min.x min.y coordinates of the model as tile origin (cartesian coords)
 """
 function get_tile_grid_origin(m::ConstModel{T1, T2};tol::T2=_TOL)::Point2D{T2} where {T1<:Integer, T2<:AbstractFloat}
+    
     nmin, nmax = get_min_max_coordinates(m)
 
-    return Point2D(nmin.x - tol, nmin.y -tol)
+    return Point2D(nmin.x - tol, nmin.y - tol)
 end
 
 
@@ -127,8 +147,9 @@ end
 Returns a matrix of size n x n type Union{Vector, Missing}. If not missing the vector
 contains the indices of the elements that are within the tile. 
 """
-function get_occmat_of_elements_in_tilegrid(m::ConstModel{T1, T2}, tg::TileGrid{T2, T1}; 
-            blockparts=1:m.no_parts, tol::T2=_TOL)::Matrix{Union{Vector{T1},Missing}} where {T1<:Integer, T2<:AbstractFloat}
+function get_occmat_of_elements_in_tilegrid(m::ConstModel{T1, T2}, tg::TileGrid{T2, T1};
+        tol::T2=_TOL
+        )::Matrix{Union{Vector{T1},Missing}} where {T1<:Integer, T2<:AbstractFloat}
     
     dx = tg.del.x
     dy = tg.del.y
@@ -151,19 +172,17 @@ function get_occmat_of_elements_in_tilegrid(m::ConstModel{T1, T2}, tg::TileGrid{
             tmin_y = dy*(t2-1)  + tg.origin.y - tol
             tmax_y = dy*t2  + tg.origin.y + tol
             hit = 0
-            for p in blockparts
-                e1 = m.elem2par[p].first
-                e2 = m.elem2par[p].last
-                for i = e1:e2
-                    no_node1 = m.nodes[m.elements[i].no_node1]
-                    no_node2 = m.nodes[m.elements[i].no_node2]
-                    if is_line_segment_inside_tile_BB_new(no_node1, no_node2, tmin_x, 
-                                tmax_x, tmin_y, tmax_y)
-                        hit += 1
-                        element_inside_tile_no[hit] = i
-                    end
+            
+            for i = 1:m.no_elements
+                pn1 = m.nodes[m.elements[i].no_node1]
+                pn2 = m.nodes[m.elements[i].no_node2]
+                if is_line_segment_inside_tile_BB_new(pn1, pn2, tmin_x, 
+                            tmax_x, tmin_y, tmax_y)
+                    hit += 1
+                    element_inside_tile_no[hit] = i
                 end
             end
+
             if hit > 0
                 t_occ[t1,t2] = element_inside_tile_no[1:hit]
             end
@@ -177,13 +196,13 @@ end
 
 legacy workaround before TileGrid struct
 """
-function get_occmat_of_elements_in_tilegrid(m::ConstModel{T1, T2}, dx::T2, dy::T2, n::T1; 
-    blockparts=1:m.no_parts)::Matrix{Union{Missing, Vector{T1}}} where {T1<:Integer, T2<:AbstractFloat}
+function get_occmat_of_elements_in_tilegrid(m::ConstModel{T1, T2}, dx::T2, dy::T2,
+         n::T1)::Matrix{Union{Missing, Vector{T1}}} where {T1<:Integer, T2<:AbstractFloat}
 
     tile_orgin = get_tile_grid_origin(m)
     tiles = TileGrid(tile_orgin, Vector2D(dx,dy), Index2D(n,n))
 
-    return get_occmat_of_elements_in_tilegrid(m, tiles, blockparts=blockparts)
+    return get_occmat_of_elements_in_tilegrid(m, tiles)
 end
 
 import Base: ismissing
@@ -209,17 +228,21 @@ function blocking_vf_with_tiles!(m::ConstModel{T2, T1}, mat::Matrix{T1},
 
     # check if element pairs are blocked by others with tiles
     max_steps = get_max_steps(tg.n.x, tg.n.y)
+    # println("max_steps", max_steps)
     tiles = Vector{Index2D{T2}}(undef,max_steps)
 
     @inbounds for i1 = 1:m.no_elements, i2 = (i1+1):m.no_elements
-        # println("--------> checking ",i1," and ",i2) 
-        p1 = m.elements[i1].com
-        p2 = m.elements[i2].com
-        if isapprox(mat[i1,i2], 1.0)
+        if isapprox(mat[i1,i2], 1.0, atol=1E-8)
+            # println("--------> checking ",i1," and ",i2) 
+            p1 = m.elements[i1].com
+            p2 = m.elements[i2].com
+
             # first tilewalk and get all tiles between i1 and i2
-            # ntiles = tilewalk_with_return!(tiles, p1, p2, tg.del.x, tg.del.y, tg.nx, tg.ny)
-            ntiles = bresenham2D!(tiles, p1, p2, tg.del.x, tg.del.y, tg.n.x, tg.n.y)
+            ntiles = tilewalk_with_return!(tiles, p1, p2, tg.del.x, tg.del.y, tg.n.x, tg.n.y)
+            # ntiles = passed_by_line!(tiles, p1, p2, tg.del.x, tg.del.y, tg.n.x, tg.n.y)
+            # @show tiles[1:ntiles]
             hitten = false
+
             for i = 1:ntiles
                 t = tiles[i]
                 # println("next tile number: ", t.x, ", ", t.y)
@@ -263,70 +286,70 @@ end
 # for the next tilewalk step. As (x_ind, y_ind) where x_ind and y_ind are the indices for
 # the next tile in x and y direction. 
 # """
-# function get_vectors_for_tilewalk(p1::Point2D{T1}, 
-#             p2::Point2D{T1})::Tuple{Vector2D{T2}, T1, Point2D{T1}} where {T1<:AbstractFloat, T2 <: Integer}
-#     vec = p2 - p1
-#     vec_l = norm(vec)
-#     vec_norm = normit(vec)
+function get_vectors_for_tilewalk(p1::Point2D{T1}, 
+            p2::Point2D{T1}) where {T1<:AbstractFloat}
+    vec = p2 - p1
+    vec_l = norm(vec)
+    vec_norm = normit(vec)
 
-#     dirx::typeof(1) = 0
-#     if vec_norm.x > _TOL
-#         dirx = 1
-#     elseif vec_norm.x < ((-1) * _TOL)
-#         dirx = -1
-#     end
+    dirx::typeof(1) = 0
+    if vec_norm.x > _TOL
+        dirx = 1
+    elseif vec_norm.x < ((-1) * _TOL)
+        dirx = -1
+    end
 
-#     diry::typeof(1) = 0
-#     if vec_norm.y > _TOL
-#         diry = 1
-#     elseif vec_norm.y < ((-1) * _TOL)
-#         diry = -1
-#     end
+    diry::typeof(1) = 0
+    if vec_norm.y > _TOL
+        diry = 1
+    elseif vec_norm.y < ((-1) * _TOL)
+        diry = -1
+    end
 
-#     return Index2D(dirx, diry), vec_l, vec_norm
-# end
+    return Index2D(dirx, diry), vec_l, vec_norm
+end
 
 
-# function find_grid_point(p1::Point2D{T1}, dir::Index2D{T2}, nx::T2, ny::T2, dx::T1, 
-#         dy::T1)::Index2D{T2} where {T1<:AbstractFloat, T2 <: Integer}
-#     # get tile of starting point
-#     tx_step = 1
-#     ty_step = 1
+function find_grid_point(p1::Point2D{T1}, dir::Index2D{T2}, nx::T2, ny::T2, dx::T1, 
+        dy::T1)::Index2D{T2} where {T1<:AbstractFloat, T2 <: Integer}
+    # get tile of starting point
+    tx_step = 1
+    ty_step = 1
 
-#     if dir.x > 0
-#         tx_step += floor(T2, (p1.x + dir.x * _TOL) / dx)
-#     elseif dir.x < 0
-#         tx_step += floor(T2, (p1.x + dir.x * _TOL) / dx)
-#     else
-#         # wenn exakt auf einer tile Linie -> 1D walk
-#         # entscheidet Vorzeichen vor _TOL wo der Bucket liegt
-#         # wichtig wenn linie am Rand
-#         if p1.x > (dx * n - _TOL)
-#             tx_step += floor(T2, (p1.x - _TOL) / dx)
-#         else
-#             tx_step += floor(T2, (p1.x + _TOL) / dx)
-#         end
-#     end
-#     if dir.y > 0
-#         ty_step += floor(T2, (p1.y + dir.y * _TOL) / dy)
-#     elseif dir.y < 0
-#         ty_step += floor(T2, (p1.y + dir.y * _TOL) / dy)
-#     else
-#         # wenn exakt auf einer tile Linie -> 1D walk
-#         # entscheidet Vorzeichen vor _TOL wo der Bucket liegt
-#         # wichtig wenn linie am Rand
-#         if p1.y > (dy * n - _TOL)
-#             ty_step += floor(T2, (p1.y - _TOL) / dy)
-#         else
-#             ty_step += floor(T2, (p1.y + _TOL) / dy)
-#         end
-#     end
+    if dir.x > 0
+        tx_step += floor(T2, (p1.x + dir.x * _TOL) / dx)
+    elseif dir.x < 0
+        tx_step += floor(T2, (p1.x + dir.x * _TOL) / dx)
+    else
+        # wenn exakt auf einer tile Linie -> 1D walk
+        # entscheidet Vorzeichen vor _TOL wo der Bucket liegt
+        # wichtig wenn linie am Rand
+        if p1.x > (dx * nx - _TOL)
+            tx_step += floor(T2, (p1.x - _TOL) / dx)
+        else
+            tx_step += floor(T2, (p1.x + _TOL) / dx)
+        end
+    end
+    if dir.y > 0
+        ty_step += floor(T2, (p1.y + dir.y * _TOL) / dy)
+    elseif dir.y < 0
+        ty_step += floor(T2, (p1.y + dir.y * _TOL) / dy)
+    else
+        # wenn exakt auf einer tile Linie -> 1D walk
+        # entscheidet Vorzeichen vor _TOL wo der Bucket liegt
+        # wichtig wenn linie am Rand
+        if p1.y > (dy * ny - _TOL)
+            ty_step += floor(T2, (p1.y - _TOL) / dy)
+        else
+            ty_step += floor(T2, (p1.y + _TOL) / dy)
+        end
+    end
 
-#     # @assert (tx_step > 0 && tx_step <= n)
-#     # @assert (ty_step > 0 && ty_step <= n)
+    # @assert (tx_step > 0 && tx_step <= n)
+    # @assert (ty_step > 0 && ty_step <= n)
 
-#     return Index2D(tx_step, ty_step)
-# end
+    return Index2D(tx_step, ty_step)
+end
 
 
 
@@ -344,66 +367,66 @@ end
 
 
 
-# function get_lengths_to_next_tiles(p1::Point2D{T1}, p2::Point2D{T1}, dir::Index2D{T2}, 
-#         tile::Index2D{T2}, dx::T1, dy::T1)::Tuple{T1,T1} where {T1<:AbstractFloat, T2<:Integer}
-#     # get lengths in x and y direction to next tiles
+function get_lengths_to_next_tiles(p1::Point2D{T1}, p2::Point2D{T1}, dir::Index2D{T2}, 
+        tile::Index2D{T2}, dx::T1, dy::T1)::Tuple{T1,T1} where {T1<:AbstractFloat, T2<:Integer}
+    # get lengths in x and y direction to next tiles
     
-#     lx::T1 = Inf
-#     ly::T1 = Inf
+    lx::T1 = Inf
+    ly::T1 = Inf
 
-#     dx_step::T1 = NaN
-#     dy_step::T1 = NaN
+    dx_step::T1 = NaN
+    dy_step::T1 = NaN
 
-#     if dir.x > 0
-#         dx_step = dx * (tile.x)
-#     elseif dir.x < 0
-#         dx_step = dx * (tile.x - 1)
-#     end
+    if dir.x > 0
+        dx_step = dx * (tile.x)
+    elseif dir.x < 0
+        dx_step = dx * (tile.x - 1)
+    end
 
-#     if dir.y > 0
-#         dy_step = dy * (tile.y)
-#     elseif dir.y < 0
-#         dy_step = dy * (tile.y - 1)
-#     end
+    if dir.y > 0
+        dy_step = dy * (tile.y)
+    elseif dir.y < 0
+        dy_step = dy * (tile.y - 1)
+    end
 
-#     # correction for 1D case and changing NaN into Inf
-#     if !isnan(dx_step)
-#         lx = dir.x * (dx_step - p1.x) * Sx((p2.y-p1.y) / (p2.x-p1.x))
-#     end
+    # correction for 1D case and changing NaN into Inf
+    if !isnan(dx_step)
+        lx = dir.x * (dx_step - p1.x) * Sx((p2.y-p1.y) / (p2.x-p1.x))
+    end
 
-#     if !isnan(dy_step)
-#         ly = dir.y * (dy_step - p1.y) * Sy((p2.y-p1.y) / (p2.x-p1.x))
-#     end
+    if !isnan(dy_step)
+        ly = dir.y * (dy_step - p1.y) * Sy((p2.y-p1.y) / (p2.x-p1.x))
+    end
 
-#     # println("lx: ",lx,"  ly: ",ly)
-#     return lx, ly
-# end
-
-
-
-# function get_next_tile(tile::Index2D{T2}, dir::Index2D{T2}, lx::T1, 
-#         ly::T1)::Tuple{Index2D{T2},T1,Symbol} where {T1<:AbstractFloat, T2<:Integer}
-#     # get next tile
-#     # bei einem 2D Fall exakt durch die Knoten entscheidet 
-#     # hier < und <= welche Seite das next tile liegt
-#     # default von mir: < geht immer in nächste y richtung
-
-#     # TODO Changes for non quad grid?!!!
+    # println("lx: ",lx,"  ly: ",ly)
+    return lx, ly
+end
 
 
-#     if abs(lx) < abs(ly)
-#         # println("moving in x direction")
-#         tile_new = tile + Index2D(dir.x, 0)
-#         lcurrent = lx
-#         color = :cyan
-#     else
-#         # println("moving in y direction")
-#         tile_new = tile + Index2D(0, dir.y)
-#         lcurrent = ly
-#         color = :coral
-#     end
-#     return tile_new, lcurrent, color
-# end
+
+function get_next_tile(tile::Index2D{T2}, dir::Index2D{T2}, lx::T1, 
+        ly::T1)::Tuple{Index2D{T2},T1,Symbol} where {T1<:AbstractFloat, T2<:Integer}
+    # get next tile
+    # bei einem 2D Fall exakt durch die Knoten entscheidet 
+    # hier < und <= welche Seite das next tile liegt
+    # default von mir: < geht immer in nächste y richtung
+
+    # TODO Changes for non quad grid?!!!
+
+
+    if abs(lx) < abs(ly)
+        # println("moving in x direction")
+        tile_new = tile + Index2D(dir.x, 0)
+        lcurrent = lx
+        color = :cyan
+    else
+        # println("moving in y direction")
+        tile_new = tile + Index2D(0, dir.y)
+        lcurrent = ly
+        color = :coral
+    end
+    return tile_new, lcurrent, color
+end
 
 
 """
@@ -432,111 +455,54 @@ end
 
 
 @inline function get_max_steps(n::T)::T where T<:Integer
-    @fastpow m1 = round(T,sqrt(n^2+n^2)*2)
-    # m2 = convert(typeof(n),m1)
-    return m1
+    return get_max_steps(n,n)
 end
 
 @inline function get_max_steps(nx::T,ny::T)::T where T<:Integer
-    @fastpow m1 = round(T,sqrt(nx^2+ny^2)*2)
-    # m2 = convert(typeof(n),m1)
-    return m1
+    # higher than it should be possible ...
+    return 2*nx+ny*2
 end
 
 
-# function tilewalk_with_return!(tile_list::Vector{Index2D{T2}}, p1::Point2D{T1}, 
-#         p2::Point2D{T1}, dx::T1, dy::T1, nx::T2, ny::T2)::T2 where {T1<:AbstractFloat, T2<:Integer}
-#     # do tilewalk between two points and check for occupied tiles
-#     max_steps = get_max_steps(n)
-#     dir, ltot, lvec = get_vectors_for_tilewalk(p1, p2)
+function tilewalk_with_return!(tile_list::Vector{Index2D{T2}}, p1::Point2D{T1}, 
+        p2::Point2D{T1}, dx::T1, dy::T1, nx::T2, ny::T2)::T2 where {T1<:AbstractFloat, T2<:Integer}
+    # do tilewalk between two points and check for occupied tiles
+    max_steps = get_max_steps(nx, ny)
+    dir, ltot, lvec = get_vectors_for_tilewalk(p1, p2)
 
-#     tile = find_grid_point(p1, dir, nx, ny, dx, dy)
-
-
-#     hit = 1
-#     tile_list[hit] = tile
-#     for step = 1:max_steps # do walk
-#         if step == max_steps
-#             @warn "reached max allowed tiles in tilewalk"
-#         end
-#         lx, ly = get_lengths_to_next_tiles(p1, p2, dir, tile, dx, dy)
-#         # check if end reached
-
-#         if lx >= (ltot - _TOL) && ly >= (ltot - _TOL)
-#             break
-#         end
-
-#         tile, nothing, nothing = get_next_tile(tile, dir, lx, ly)
-#         hit += 1
-        
-#         @assert (tile.x > 0 && tile.x <= n)
-#         @assert (tile.y > 0 && tile.y <= n)
-
-#         tile_list[hit] = tile
-#     end
-#     return hit
-# end
+    tile = find_grid_point(p1, dir, nx, ny, dx, dy)
 
 
-
-function bresenham2D!(tile_list::Vector{Index2D{T2}}, p1::Point2D{T1}, 
-            p2::Point2D{T1}, dx::T1, dy::T1, nx::T2, ny::T2)::T2 where {T1<:AbstractFloat, T2<:Integer}
-    # Because we used tolerance to assign elements to tiles, tolerance should not be needed here?
-
-    x1_grid = round(Int, p1.x / dx)
-    y1_grid = round(Int, p1.y / dy)
-    x2_grid = round(Int, p2.x / dx)
-    y2_grid = round(Int, p2.y / dy)
-
-    x1_grid = clamp(x1_grid, 1, nx)
-    y1_grid = clamp(y1_grid, 1, ny)
-    x2_grid = clamp(x2_grid, 1, nx)
-    y2_grid = clamp(y2_grid, 1, ny)
-
-    dx_gitter = x2_grid - x1_grid
-    dy_gitter = y2_grid - y1_grid
-    abs_dx = abs(dx_gitter)
-    abs_dy = abs(dy_gitter)
-    
-
-    sx = dx_gitter >= 0 ? 1 : -1
-    sy = dy_gitter >= 0 ? 1 : -1
-    
-
-    err = (abs_dx > abs_dy ? abs_dx : -abs_dy) // 2
-    e2 = 0
-    
-    no_hits = 1
-    tile_list[no_hits] = Index2D(x1_grid, y1_grid)
-
-    while x1_grid != x2_grid || y1_grid != y2_grid
-        e2 = err
-
-        if e2 > -abs_dx
-            err -= abs_dy
-            x1_grid += sx
-        
-            x1_grid = clamp(x1_grid, 1, nx)
+    hit = 1
+    tile_list[hit] = tile
+    for step = 1:max_steps # do walk
+        if step == max_steps
+            @warn "reached max allowed tiles in tilewalk"
         end
-        
+        lx, ly = get_lengths_to_next_tiles(p1, p2, dir, tile, dx, dy)
+        # check if end reached
 
-        if e2 < abs_dy
-            err += abs_dx
-            y1_grid += sy
-
-            y1_grid = clamp(y1_grid, 1, ny)
-        end
-        
-
-        no_hits += 1
-        tile_list[no_hits] = Index2D(x1_grid, y1_grid)
-
-        
-        # reached final tile / bucket
-        if x1_grid == x2_grid && y1_grid == y2_grid
+        if lx >= (ltot - _TOL) && ly >= (ltot - _TOL)
             break
         end
+
+        tile, nothing, nothing = get_next_tile(tile, dir, lx, ly)
+        hit += 1
+        
+
+        if !(tile.x > 0 && tile.x <= nx)
+            println("tile.x $(tile.x)")
+        end
+
+        if !(tile.y > 0 && tile.y <= ny)
+            println("tile.y $(tile.y)")
+        end
+
+        @assert (tile.x > 0 && tile.x <= nx)
+        @assert (tile.y > 0 && tile.y <= ny)
+
+        tile_list[hit] = tile
     end
-    
-    return no_hits
+    return hit
 end
+

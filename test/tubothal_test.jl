@@ -84,18 +84,16 @@ vfmat = zeros(Float64, m_const.no_elements, m_const.no_elements)
 existing_vf!(m_const, vfmat)
 tile_orgin = get_tile_grid_origin(m_const)
 
-tiles = TileGrid(tile_orgin, Vector2D(dx,dy), Index2D(n,n))
-
-t_occ = get_occmat_of_elements_in_tilegrid(m_const, dx, dy, n)
-
+tg = TileGrid(tile_orgin, Vector2D(dx,dy), Index2D(n,n))
+t_occ = get_occmat_of_elements_in_tilegrid(m_const, tg)
+occtg = OccupiedTileGrid(tg, t_occ)
 
 # Plots.spy(ismissing.(t_occ))
-
 # this is working fine
 # blocking_vf_brute_force!(m_const, vfmat)
 
 # this is not -> seems to be that tiles does not support negativ model coordinates -> modify tile model!!
-blocking_vf_with_tiles!(m_const, vfmat, dx, dy, n, t_occ) # here is a bug somewhere / even if RadMod2D tests are running fine ...
+blocking_vf_with_tiles!(m_const, vfmat, occtg) # here is a bug somewhere / even if RadMod2D tests are running fine ...
 
 calculating_vf!(m_const, vfmat, normit = false)
 vfmatp = compact_vfmat_to_parts(m_const, vfmat, normit = true)

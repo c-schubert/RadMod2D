@@ -6,8 +6,10 @@ r1x = 0.8
 r1y = 0.8
 r2x = 1.2
 r2y = 1.2
-elemsize = 0.05
+elemsize = 0.01
 m = model_rect_in_rect(r1x, r1y, r2x, r2y, elemsize)
+
+println("Radiation model with $(m.no_elements)")
 
 # view factors
 vfmat = zeros(Float64, m.no_elements, m.no_elements)
@@ -16,18 +18,32 @@ vfmat = zeros(Float64, m.no_elements, m.no_elements)
 vfmat2 = zeros(Float64, m.no_elements, m.no_elements)
 @time existing_vf!(m, vfmat2)
 
-n = 30
+@assert isapprox(vfmat,vfmat2)
 
-@time dx, dy =  get_tile_deltas(m, n)
-@time tile_orgin = get_tile_grid_origin(m)
-@time tg = TileGrid(tile_orgin, Vector2D(dx,dy), Index2D(n,n)) 
-@time t_occ = get_occmat_of_elements_in_tilegrid(m, dx, dy, n)
-@time occtg = OccupiedTileGrid(tg, t_occ)
+nx = 10
+ny = 40
 
+dx, dy =  get_tile_deltas(m, nx, ny)
+tile_orgin = get_tile_grid_origin(m)
+tg = TileGrid(tile_orgin, Vector2D(dx,dy), Index2D(nx,ny)) 
+
+println("Get tile grid occupation:")
+@time t_occ = get_occmat_of_elements_in_tilegrid(m, tg)
+
+occtg = OccupiedTileGrid(tg, t_occ)
+
+println("Brute Force Blocking:")
 @time blocking_vf_brute_force!(m, vfmat)
+
+println("Tile Grid Blocking:")
 @time blocking_vf_with_tiles!(m, vfmat2, occtg)
 
-isapprox(vfmat, vfmat2, atol=1e-6)
+@show isapprox(vfmat, vfmat2, atol=1e-6)
+
+vfdev = vfmat2 .- vfmat
+total_sum = reduce(+,vfdev)
+
+println("Blocking deviation: ", total_sum)
 
 # @time calculating_vf!(m, vfmat, normit = true)
 # vfmatp = compact_vfmat_to_parts(m, vfmat, normit = true)
