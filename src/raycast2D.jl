@@ -4,6 +4,7 @@
 # -add more tests
 
 
+
 struct TileGrid{T1<:AbstractFloat, T2<:Integer}
     origin::Point2D{T1}
     del::Vector2D{T1}
@@ -17,7 +18,8 @@ struct OccupiedTileGrid{T1<:AbstractFloat, T2<:Integer}
     occ::Matrix{Union{Vector{T2},Missing}}
 
     OccupiedTileGrid(tg::TileGrid{T1,T2}, occ::Matrix{Union{Vector{T2},Missing}}
-            ) where {T1<:AbstractFloat, T2<:Integer} = new{T1,T2}(tg.origin, tg.del, tg.n, occ)
+            ) where {T1<:AbstractFloat, T2<:Integer} = 
+            new{T1,T2}(tg.origin, tg.del, tg.n, occ)
 end
 
 
@@ -239,7 +241,7 @@ function blocking_vf_with_tiles!(m::ConstModel{T2, T1}, mat::Matrix{T1},
 
             # first tilewalk and get all tiles between i1 and i2
             ntiles = tilewalk_with_return!(tiles, p1, p2, tg.del.x, tg.del.y, tg.n.x, tg.n.y)
-            # ntiles = passed_by_line!(tiles, p1, p2, tg.del.x, tg.del.y, tg.n.x, tg.n.y)
+            # ntiles = fast_voxel_traversal_2d!(tiles, p1, p2, tg)
             # @show tiles[1:ntiles]
             hitten = false
 
@@ -506,3 +508,82 @@ function tilewalk_with_return!(tile_list::Vector{Index2D{T2}}, p1::Point2D{T1},
     return hit
 end
 
+
+function signum(x)
+    x > 0 ? 1 : (x < 0 ? -1 : 0)
+end
+
+
+function fast_voxel_traversal_2d!(tile_list::Vector{Index2D{T2}}, p1::Point2D{T1}, 
+        p2::Point2D{T1}, tg::OccupiedTileGrid{T1, T2})::T2 where {T1<:AbstractFloat, T2<:Integer}
+    
+
+    return fast_voxel_traversal_2d!(tile_list, Ray2D(p1,p2), tg.origin, tg.n.x, 
+            tg.n.y, tg.del.x, tg.del.y)
+end
+
+
+function fast_voxel_traversal_2d!(tile_list::Vector{Index2D{T2}}, ray::Ray2D{T1}, 
+    grid_origin::Point2D{T1}, nx::T2, ny::T2, cell_dx::T1, 
+    cell_dy::T1)::T2 where {T1<:AbstractFloat, T2<:Integer}
+
+    ox = ray.origin.x
+    oy = ray.origin.y
+
+    dx = ray.direction.x
+    dy = ray.direction.y
+
+    gx = grid_origin.x
+    gy = grid_origin.y
+
+    # Voxel coordinates of the ray's origin
+    vx, vy = floor(Int, (ox - gx) / cell_dx), floor(Int, (oy - gy) / cell_dy)
+
+    # Step direction
+    step_x, step_y = sign(dx), sign(dy)
+
+    # Voxel boundary values along x and y
+    if step_x != 0
+        t_max_x = ((vx + (step_x > 0 ? 1 : 0)) * cell_dx + gx - ox) / dx
+    else
+        t_max_x = Inf
+    end
+
+    if step_y != 0
+        t_max_y = ((vy + (step_y > 0 ? 1 : 0)) * cell_dy + gy - oy) / dy
+    else
+        t_max_y = Inf
+    end
+
+    # Delta values
+    if step_x != 0
+        t_delta_x = abs(cell_dx / dx)
+    else
+        t_delta_x = Inf
+    end
+
+    if step_y != 0
+        t_delta_y = abs(cell_dy / dy)
+    else
+        t_delta_y = Inf
+    end
+
+    hitten_tiles = 0
+
+    # Traverse the grid
+    while 0 <= vx < nx && 0 <= vy < ny
+        # println("Voxel: ($vx, $vy)")
+        push!(tile_list, Index2D(vx, vy))
+        hitten_tiles += 1
+
+        if t_max_x < t_max_y
+            vx += step_x
+            t_max_x += t_delta_x
+        else
+            vy += step_y
+            t_max_y += t_delta_y
+        end
+    end
+
+    return hitten_tiles
+end

@@ -23,13 +23,27 @@ struct Index2D{T<:Integer} <: Pair2D{T}
 end
 
 
+struct Ray2D{T<:Real} <: Pair2D{T}
+    origin::Point2D
+    direction::Vector2D
+
+    Ray2D(p1::Point2D{T}, p2::Point2D{T}) where {T<:Real} = 
+            new{T}(p1, Vector2D(p2.x-p1.x, p2.y-p1.y))
+end
+
+
+
 Point2D(x::Real, y::Real) = Point2D(promote(x,y)...)
 Point2D(x::Integer, y::Integer) = Point2D(convert(typeof(1.0),x), convert(typeof(1.0),y))
 
 Vector2D(x::Real, y::Real) = Vector2D(promote(x,y)...)
 Vector2D(x::Integer, y::Integer) = Vector2D(convert(typeof(1.0),x), convert(typeof(1.0),y))
 
-Index2D(x::Real, y::Real) = Index(convert(typeof(1),x), convert(typeof(1),y))
+Ray2D(x::Real, y::Real) = Ray2D(promote(x,y)...)
+Ray2D(x::Integer, y::Integer) = Ray2D(convert(typeof(1.0),x), convert(typeof(1.0),y))
+
+
+Index2D(x::Real, y::Real) = Index2D(convert(typeof(1),x), convert(typeof(1),y))
 
 
 import Base: convert
@@ -37,6 +51,7 @@ import Base: convert
 convert(::Type{Point2D}, x::Tuple{T,T}) where T <: Number = Point2D(x[1],x[2])
 convert(::Type{Vector2D}, x::Tuple{T,T}) where T <: Number = Vector2D(x[1],x[2])
 convert(::Type{Index2D}, x::Tuple{T,T}) where T <: Number = Index2D(x[1],x[2])
+convert(::Type{Ray2D}, x::Tuple{T,T}) where T <: Number = Ray2D(x[1],x[2])
 
 import Base: size, getindex, unsafe_getindex, setindex!, unsafe_setindex!, +, -, *, /
 
